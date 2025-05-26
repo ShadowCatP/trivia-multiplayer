@@ -55,6 +55,21 @@ describe('AuthService', () => {
     expect(localStorage.getItem('access_token')).toBe(TOKEN);
   });
 
+  it('should set the token on successful register', () => {
+    buildTestBed(createJwtSpy(false));
+    service = TestBed.inject(AuthService);
+    http = TestBed.inject(HttpTestingController);
+
+    service.register({ username: 'john', password: 'doe' }).subscribe();
+    const req = http.expectOne('/api/register');
+    req.flush({ token: TOKEN });
+
+    TestBed.flushEffects();
+
+    expect(service.token).toBe(TOKEN);
+    expect(localStorage.getItem('access_token')).toBe(TOKEN);
+  });
+
   it('should return true on fresh token', () => {
     localStorage.setItem('access_token', TOKEN);
     buildTestBed(createJwtSpy(false));
