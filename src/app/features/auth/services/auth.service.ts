@@ -18,8 +18,8 @@ export class AuthService {
     () => !!this._token() && !this.jwtHelper.isTokenExpired(this._token()),
   );
 
-  get token(): string | undefined {
-    return this._token() ?? undefined;
+  get token(): string | null {
+    return this._token() ?? null;
   }
 
   private http = inject(HttpClient);
@@ -48,9 +48,5 @@ export class AuthService {
 
   logout() {
     this._token.set(null);
-  }
-
-  getToken(): string | null {
-    return this._token();
   }
 }

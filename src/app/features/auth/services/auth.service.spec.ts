@@ -51,7 +51,7 @@ describe('AuthService', () => {
 
     TestBed.flushEffects();
 
-    expect(service.getToken()).toBe(TOKEN);
+    expect(service.token).toBe(TOKEN);
     expect(localStorage.getItem('access_token')).toBe(TOKEN);
   });
 
@@ -80,7 +80,7 @@ describe('AuthService', () => {
     service.logout();
     TestBed.flushEffects();
 
-    expect(service.getToken()).toBeNull();
+    expect(service.token).toBeNull();
     expect(localStorage.getItem('access_token')).toBeNull();
   });
 });
