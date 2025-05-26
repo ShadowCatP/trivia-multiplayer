@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { catchError, tap, throwError } from 'rxjs';
+import { environment } from '../../../environments/environments';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly authUrl = '/api/login'; // TODO add real backend endpoint here
-  private readonly tokenKey = 'access_token';
+  private readonly authUrl = environment.authUrl; // TODO add real backend endpoint here
+  private readonly tokenKey = environment.tokenKey ?? 'access_token';
 
   private readonly _token = signal<string | null>(
     localStorage.getItem(this.tokenKey),
