@@ -7,6 +7,7 @@ import { TestBed } from '@angular/core/testing';
 import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environments';
 
 const TOKEN = 'header.payload.signature';
 
@@ -46,7 +47,7 @@ describe('AuthService', () => {
     http = TestBed.inject(HttpTestingController);
 
     service.login({ username: 'john', password: 'doe' }).subscribe();
-    const req = http.expectOne('/api/login');
+    const req = http.expectOne(environment.authUrl + '/login');
     req.flush({ token: TOKEN });
 
     TestBed.flushEffects();
@@ -61,7 +62,7 @@ describe('AuthService', () => {
     http = TestBed.inject(HttpTestingController);
 
     service.register({ username: 'john', password: 'doe' }).subscribe();
-    const req = http.expectOne('/api/register');
+    const req = http.expectOne(environment.authUrl + '/register');
     req.flush({ token: TOKEN });
 
     TestBed.flushEffects();

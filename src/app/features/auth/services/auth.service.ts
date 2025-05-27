@@ -9,7 +9,7 @@ import { User } from '../models/User';
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly authUrl = environment.authUrl; // TODO add real backend endpoint here
+  private readonly authUrl = environment.authUrl;
   private readonly tokenKey = environment.tokenKey ?? 'access_token';
 
   private readonly _token = signal<string | null>(
