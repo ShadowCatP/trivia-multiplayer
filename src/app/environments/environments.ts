@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  authUrl: '/api',
+  authUrl: 'http://localhost:5001/api',
   tokenKey: 'access_token',
 };
