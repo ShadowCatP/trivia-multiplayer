@@ -48,7 +48,7 @@ describe('AuthService', () => {
 
     service.login({ username: 'john', password: 'doe' }).subscribe();
     const req = http.expectOne(environment.authUrl + '/login');
-    req.flush({ token: TOKEN });
+    req.flush({ access_token: TOKEN });
 
     TestBed.flushEffects();
 
@@ -63,7 +63,7 @@ describe('AuthService', () => {
 
     service.register({ username: 'john', password: 'doe' }).subscribe();
     const req = http.expectOne(environment.authUrl + '/register');
-    req.flush({ token: TOKEN });
+    req.flush({ access_token: TOKEN });
 
     TestBed.flushEffects();
 
@@ -85,6 +85,32 @@ describe('AuthService', () => {
     service = TestBed.inject(AuthService);
 
     expect(service.isAuthenticated()).toBeFalse();
+  });
+
+  it('should refresh token and update access token', () => {
+    const REFRESH_TOKEN = 'refresh.header.signature';
+    const NEW_ACCESS_TOKEN = 'access.header.signature';
+
+    localStorage.setItem('refresh_token', REFRESH_TOKEN);
+
+    buildTestBed(createJwtSpy(true));
+    service = TestBed.inject(AuthService);
+    http = TestBed.inject(HttpTestingController);
+
+    service.refreshToken().subscribe();
+
+    const req = http.expectOne(environment.authUrl + '/refresh');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.headers.get('Authorization')).toBe(
+      `Bearer ${REFRESH_TOKEN}`,
+    );
+
+    req.flush({ access_token: NEW_ACCESS_TOKEN });
+
+    TestBed.flushEffects();
+
+    expect(service.token).toBe(NEW_ACCESS_TOKEN);
+    expect(localStorage.getItem('access_token')).toBe(NEW_ACCESS_TOKEN);
   });
 
   it('should clear token on logout', () => {

@@ -1,4 +1,5 @@
 export type User = {
   username: string;
-  token: string;
+  access_token: string;
+  refresh_token: string;
 };
