@@ -3,53 +3,35 @@ import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { catchError, firstValueFrom, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environments';
+import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly authUrl = environment.authUrl;
-  private readonly tokenKey = environment.tokenKey ?? 'access_token';
 
-  private readonly _token = signal<string | null>(
-    localStorage.getItem(this.tokenKey),
-  );
+  private readonly http = inject(HttpClient);
+  private readonly jwtHelper = inject(JwtHelperService);
+  private readonly tokenService = inject(TokenService);
 
-  private readonly _refresh_token = signal<string | null>(
-    localStorage.getItem('refresh_token'),
-  );
-
-  readonly isAuthenticated = computed(
-    () =>
-      !!this._token() &&
-      (!this.jwtHelper.isTokenExpired(this._token()) ||
-        !this.jwtHelper.isTokenExpired(this._refresh_token())),
-  );
-
-  get token(): string | null {
-    return this._token() ?? null;
+  get accessToken(): string | null {
+    return this.tokenService.accessToken();
   }
 
-  get refresh_token(): string | null {
-    return this._refresh_token() ?? null;
+  get refreshToken(): string | null {
+    return this.tokenService.refreshToken();
   }
 
-  private http = inject(HttpClient);
-  private jwtHelper = inject(JwtHelperService);
-
-  constructor() {
-    effect(() => {
-      const token = this._token();
-      const refreshToken = this._refresh_token();
-      if (token) {
-        localStorage.setItem(this.tokenKey, token);
-        localStorage.setItem('refresh_token', refreshToken!);
-      } else {
-        localStorage.removeItem(this.tokenKey);
-        localStorage.removeItem('refresh_token');
-      }
-    }); // this will sync token in local storage
-  }
+  readonly isAuthenticated = computed(() => {
+    const accessToken = this.tokenService.accessToken();
+    const refreshToken = this.tokenService.refreshToken();
+    return (
+      !!accessToken &&
+      (!this.jwtHelper.isTokenExpired(accessToken) ||
+        !this.jwtHelper.isTokenExpired(refreshToken))
+    );
+  });
 
   login(credentials: { username: string; password: string }) {
     return this.http
@@ -59,8 +41,7 @@ export class AuthService {
       }>(this.authUrl + '/login', credentials)
       .pipe(
         tap(({ access_token, refresh_token }) => {
-          this._token.set(access_token);
-          this._refresh_token.set(refresh_token);
+          this.tokenService.setTokens(access_token, refresh_token);
         }),
         catchError((err) => {
           console.error('Login Failed', err);
@@ -77,8 +58,7 @@ export class AuthService {
       }>(this.authUrl + '/register', credentials)
       .pipe(
         tap(({ access_token, refresh_token }) => {
-          this._token.set(access_token);
-          this._refresh_token.set(refresh_token);
+          this.tokenService.setTokens(access_token, refresh_token);
         }),
         catchError((err) => {
           console.error('Registration Failed', err);
@@ -87,21 +67,19 @@ export class AuthService {
       );
   }
 
-  refreshToken() {
-    console.log('access', this._token());
-    console.log('refresh', this._refresh_token());
-    if (!this._refresh_token())
-      return throwError(() => new Error('No refresh token'));
+  updateToken() {
+    const refreshToken = this.tokenService.refreshToken();
+    if (!refreshToken) return throwError(() => new Error('No refresh token'));
 
     return this.http
       .post<{ access_token: string }>(this.authUrl + '/refresh', null, {
         headers: {
-          Authorization: `Bearer ${this._refresh_token()}`,
+          Authorization: `Bearer ${refreshToken}`,
         },
       })
       .pipe(
         tap(({ access_token }) => {
-          this._token.set(access_token);
+          this.tokenService.setTokens(access_token, refreshToken);
         }),
         catchError((err) => {
           console.error('Token refresh failed:', err);
@@ -112,7 +90,6 @@ export class AuthService {
   }
 
   logout() {
-    this._token.set(null);
-    this._refresh_token.set(null);
+    this.tokenService.clearTokens();
   }
 }

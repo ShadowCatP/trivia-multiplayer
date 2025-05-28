@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../../environments/environments';
 
 const TOKEN = 'header.payload.signature';
+const REFRESH_TOKEN = 'refresh.header.signature';
 
 function createJwtSpy(expired: boolean) {
   return jasmine.createSpyObj('JwtHelperService', {
@@ -28,6 +29,7 @@ function buildTestBed(jwtSpy: any) {
       },
       { provide: JwtHelperService, useValue: jwtSpy },
       { provide: JWT_OPTIONS, useValue: {} },
+      AuthService,
     ],
   });
 }
@@ -47,13 +49,15 @@ describe('AuthService', () => {
     http = TestBed.inject(HttpTestingController);
 
     service.login({ username: 'john', password: 'doe' }).subscribe();
+
     const req = http.expectOne(environment.authUrl + '/login');
-    req.flush({ access_token: TOKEN });
+    req.flush({ access_token: TOKEN, refresh_token: REFRESH_TOKEN });
 
     TestBed.flushEffects();
 
-    expect(service.token).toBe(TOKEN);
+    expect(service.accessToken).toBe(TOKEN);
     expect(localStorage.getItem('access_token')).toBe(TOKEN);
+    expect(localStorage.getItem('refresh_token')).toBe(REFRESH_TOKEN);
   });
 
   it('should set the token on successful register', () => {
@@ -62,25 +66,32 @@ describe('AuthService', () => {
     http = TestBed.inject(HttpTestingController);
 
     service.register({ username: 'john', password: 'doe' }).subscribe();
+
     const req = http.expectOne(environment.authUrl + '/register');
-    req.flush({ access_token: TOKEN });
+    req.flush({ access_token: TOKEN, refresh_token: REFRESH_TOKEN });
 
     TestBed.flushEffects();
 
-    expect(service.token).toBe(TOKEN);
+    expect(service.accessToken).toBe(TOKEN);
     expect(localStorage.getItem('access_token')).toBe(TOKEN);
+    expect(localStorage.getItem('refresh_token')).toBe(REFRESH_TOKEN);
   });
 
   it('should return true on fresh token', () => {
     localStorage.setItem('access_token', TOKEN);
+    localStorage.setItem('refresh_token', REFRESH_TOKEN);
+
     buildTestBed(createJwtSpy(false));
     service = TestBed.inject(AuthService);
 
+    // isAuthenticated is a computed signal so call as function
     expect(service.isAuthenticated()).toBeTrue();
   });
 
   it('should return false on expired token', () => {
     localStorage.setItem('access_token', TOKEN);
+    localStorage.setItem('refresh_token', REFRESH_TOKEN);
+
     buildTestBed(createJwtSpy(true));
     service = TestBed.inject(AuthService);
 
@@ -88,16 +99,15 @@ describe('AuthService', () => {
   });
 
   it('should refresh token and update access token', () => {
-    const REFRESH_TOKEN = 'refresh.header.signature';
-    const NEW_ACCESS_TOKEN = 'access.header.signature';
-
     localStorage.setItem('refresh_token', REFRESH_TOKEN);
 
     buildTestBed(createJwtSpy(true));
     service = TestBed.inject(AuthService);
     http = TestBed.inject(HttpTestingController);
 
-    service.refreshToken().subscribe();
+    const NEW_ACCESS_TOKEN = 'new.access.token';
+
+    service.updateToken().subscribe();
 
     const req = http.expectOne(environment.authUrl + '/refresh');
     expect(req.request.method).toBe('POST');
@@ -109,20 +119,23 @@ describe('AuthService', () => {
 
     TestBed.flushEffects();
 
-    expect(service.token).toBe(NEW_ACCESS_TOKEN);
+    expect(service.accessToken).toBe(NEW_ACCESS_TOKEN);
     expect(localStorage.getItem('access_token')).toBe(NEW_ACCESS_TOKEN);
   });
 
-  it('should clear token on logout', () => {
+  it('should clear tokens on logout', () => {
     localStorage.setItem('access_token', TOKEN);
-    buildTestBed(createJwtSpy(false));
+    localStorage.setItem('refresh_token', REFRESH_TOKEN);
 
+    buildTestBed(createJwtSpy(false));
     service = TestBed.inject(AuthService);
 
     service.logout();
+
     TestBed.flushEffects();
 
-    expect(service.token).toBeNull();
+    expect(service.accessToken).toBeNull();
     expect(localStorage.getItem('access_token')).toBeNull();
+    expect(localStorage.getItem('refresh_token')).toBeNull();
   });
 });

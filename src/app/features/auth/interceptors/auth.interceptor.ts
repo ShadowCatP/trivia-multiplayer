@@ -3,12 +3,13 @@ import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { TokenService } from '../services/token.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
+  const tokenService = inject(TokenService);
 
-  const token = auth.token;
-  const refreshToken = auth.refresh_token;
+  const token = tokenService.accessToken();
 
   const newReq = token
     ? req.clone({
@@ -24,12 +25,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           return throwError(() => err);
         }
 
-        return auth.refreshToken().pipe(
+        return auth.updateToken().pipe(
           switchMap(() => {
-            if (!refreshToken) return throwError(() => err);
+            const newToken = tokenService.refreshToken();
+            if (!newToken) {
+              auth.logout();
+              return throwError(() => err);
+            }
 
             const retryReq = req.clone({
-              setHeaders: { Authorization: `Bearer ${refreshToken}` },
+              setHeaders: { Authorization: `Bearer ${newToken}` },
             });
 
             return next(retryReq);
