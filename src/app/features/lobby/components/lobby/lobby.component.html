@@ -1,0 +1,87 @@
+<div class="mx-auto flex max-w-md flex-col gap-4 px-2 text-white">
+  <!-- Lobby Header -->
+  <div class="flex flex-col justify-center gap-2 text-center">
+    <div class="inline-flex items-center justify-center gap-3">
+      <div
+        class="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-3"
+      >
+        <lucide-angular class="h-8 w-8" [img]="Gamepad2" />
+      </div>
+      <h2 class="text-3xl font-bold">Trivia Lobby</h2>
+    </div>
+    <p class="text-slate-400">Create or join a multiplayer trivia</p>
+  </div>
+
+  <!-- Main Card -->
+  <div class="rounded-2xl border border-white/40 bg-white/20 p-6 shadow-2xl">
+    <div class="flex flex-col gap-4">
+      <h3 class="flex items-center gap-2 text-lg font-semibold">
+        <lucide-angular class="h-5 w-5" [img]="Users" />
+        Host Game
+      </h3>
+      <button
+        class="animate-gradient group relative flex w-full transform cursor-pointer items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 font-semibold transition-all duration-300 hover:scale-105"
+        (click)="hostGame()"
+      >
+        <lucide-angular [img]="Zap" />
+        Create New Lobby
+      </button>
+    </div>
+
+    <!-- Divider -->
+    <div class="relative my-6 w-full">
+      <div class="absolute inset-0 flex items-center">
+        <div class="-z-0 w-full border-t border-white/20"></div>
+      </div>
+      <div class="flex justify-center text-sm">
+        <span class="z-0 rounded-full bg-neutral-500 px-4 text-slate-300"
+          >OR</span
+        >
+      </div>
+    </div>
+
+    <!-- Join Game -->
+    <div>
+      <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold">
+        <lucide-angular class="h-5 w-5" [img]="Gamepad2" />
+        Join Game
+      </h3>
+      <form
+        [formGroup]="roomCodeForm"
+        (ngSubmit)="$event.preventDefault(); onJoin()"
+        class="flex flex-col gap-3"
+      >
+        <input
+          type="text"
+          formControlName="roomId"
+          placeholder="Enter lobby code..."
+          class="w-full rounded-xl border border-white/20 bg-black/20 px-4 py-4 font-mono tracking-wider text-white uppercase placeholder-slate-400 transition-all duration-300 placeholder:normal-case focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none"
+        />
+        <button
+          type="submit"
+          class="animate-gradient flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-blue-600 to-green-600 px-6 py-4 font-semibold shadow-lg transition-all hover:scale-105"
+        >
+          <lucide-angular [img]="Users" class="h-5 w-5" />
+          Join Lobby
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="mt-6 text-center">
+    <p class="text-sm text-slate-500">
+      Share your lobby code with friends to play together
+    </p>
+    <div class="mt-4">
+      <p class="text-xs text-slate-400">Scroll down to browse public rooms</p>
+      <div class="mt-2 animate-bounce">
+        <div
+          class="mx-auto h-6 w-6 -rotate-45 transform border-b-2 border-l-2 border-slate-400"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <app-lobbies-list />
+</div>
