@@ -2,7 +2,6 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { JwtHelperService } from '@auth0/angular-jwt';
 import { TokenService } from '../services/token.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
@@ -11,11 +10,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const token = tokenService.accessToken();
 
-  const newReq = token
-    ? req.clone({
-        setHeaders: { Authorization: `Bearer ${token}` },
-      })
-    : req;
+  const newReq =
+    token && !req.url.includes('/refresh')
+      ? req.clone({
+          setHeaders: { Authorization: `Bearer ${token}` },
+        })
+      : req;
 
   return next(newReq).pipe(
     catchError((err) => {
@@ -27,7 +27,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
         return auth.updateToken().pipe(
           switchMap(() => {
-            const newToken = tokenService.refreshToken();
+            const newToken = tokenService.accessToken();
             if (!newToken) {
               auth.logout();
               return throwError(() => err);
