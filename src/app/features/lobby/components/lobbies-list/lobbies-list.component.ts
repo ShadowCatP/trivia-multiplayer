@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { LobbyService } from '../../services/lobby.service';
 import { Room } from '../../types/Room';
 
@@ -8,19 +8,30 @@ import { Room } from '../../types/Room';
   templateUrl: './lobbies-list.component.html',
   styleUrl: './lobbies-list.component.css',
 })
-export class LobbiesListComponent {
+export class LobbiesListComponent implements OnInit {
   private readonly lobbyService = inject(LobbyService);
 
   rooms: Room[] = [];
 
-  constructor() {
-    this.lobbyService.getRooms().subscribe({
-      next: (res: any) => {
-        this.rooms = res;
-        console.log(res);
+  ngOnInit(): void {
+    // load initial server state
+    this.lobbyService.getInitialRooms().subscribe({
+      next: (initialRooms: any) => {
+        this.rooms = initialRooms;
       },
       error: (err) => {
-        console.log('Error loading rooms: ', err);
+        console.error('Error loading initial rooms: ', err);
+      },
+    });
+
+    // subsrabe to further updates from the server
+    this.lobbyService.getRooms().subscribe({
+      next: (res: any) => {
+        console.log(res);
+        this.rooms = res;
+      },
+      error: (err) => {
+        console.error('Error loading rooms: ', err);
       },
     });
   }
