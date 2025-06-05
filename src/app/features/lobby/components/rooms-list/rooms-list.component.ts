@@ -10,12 +10,12 @@ import {
 } from 'lucide-angular';
 
 @Component({
-  selector: 'app-lobbies-list',
+  selector: 'app-rooms-list',
   imports: [LucideAngularModule],
-  templateUrl: './lobbies-list.component.html',
-  styleUrl: './lobbies-list.component.css',
+  templateUrl: './rooms-list.component.html',
+  styleUrl: './rooms-list.component.css',
 })
-export class LobbiesListComponent implements OnInit {
+export class RoomsListComponent implements OnInit {
   readonly Globe = Globe;
   readonly Crown = Crown;
   readonly Users = Users;

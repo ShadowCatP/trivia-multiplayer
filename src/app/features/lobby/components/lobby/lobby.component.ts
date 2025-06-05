@@ -1,13 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule, Gamepad2, Users, Zap } from 'lucide-angular';
-import { LobbiesListComponent } from '../lobbies-list/lobbies-list.component';
+import { RoomsListComponent } from '../rooms-list/rooms-list.component';
 import { Router } from '@angular/router';
 import { LobbyService } from '../../services/lobby.service';
 
 @Component({
   selector: 'app-lobby',
-  imports: [LucideAngularModule, ReactiveFormsModule, LobbiesListComponent],
+  imports: [LucideAngularModule, ReactiveFormsModule, RoomsListComponent],
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.css',
 })
