@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { catchError, firstValueFrom, tap, throwError } from 'rxjs';
+import { catchError, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environments';
 import { TokenService } from './token.service';
 
