@@ -4,4 +4,5 @@ export type Room = {
   host: string;
   isPublic: boolean;
   inviteCode: string;
+  players: number;
 };

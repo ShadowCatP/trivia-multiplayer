@@ -1,14 +1,26 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { LobbyService } from '../../services/lobby.service';
 import { Room } from '../../types/Room';
+import {
+  Globe,
+  LucideAngularModule,
+  Crown,
+  Users,
+  UserPlus,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-lobbies-list',
-  imports: [],
+  imports: [LucideAngularModule],
   templateUrl: './lobbies-list.component.html',
   styleUrl: './lobbies-list.component.css',
 })
 export class LobbiesListComponent implements OnInit {
+  readonly Globe = Globe;
+  readonly Crown = Crown;
+  readonly Users = Users;
+  readonly UserPlus = UserPlus;
+
   private readonly lobbyService = inject(LobbyService);
 
   rooms: Room[] = [];
@@ -24,7 +36,7 @@ export class LobbiesListComponent implements OnInit {
       },
     });
 
-    // subsrabe to further updates from the server
+    // subscribe to further updates from the server
     this.lobbyService.getRooms().subscribe({
       next: (res: any) => {
         console.log(res);

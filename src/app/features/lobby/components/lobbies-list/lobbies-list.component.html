@@ -1,7 +1,38 @@
-<ul>
+<div class="mb-6 text-center">
+  <div class="mb-3 inline-flex items-center gap-3">
+    <div class="rounded-full bg-gradient-to-r from-green-500 to-teal-500 p-3">
+      <lucide-angular [img]="Globe" class="h-8 w-8" />
+    </div>
+    <h2 class="text-3xl font-bold">Public Rooms</h2>
+  </div>
+  <p class="text-slate-400">Join public trivias created by other users</p>
+</div>
+<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
   @for (room of rooms; track $index) {
-    <li>
-      {{ room.roomName }}
-    </li>
+    <div
+      class="flex flex-col rounded-xl border border-white/20 bg-white/10 p-4 transition-all duration-300 hover:scale-105 hover:border-white/40"
+    >
+      <h4 class="flex-1 truncate text-xl font-semibold">
+        {{ room.roomName }}
+      </h4>
+
+      <div class="mb-3 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-sm text-slate-300">
+          <lucide-angular [img]="Crown" class="h-3 w-3" />
+          <span>{{ room.host }}</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-slate-300">
+          <lucide-angular [img]="Users" class="h-3 w-3" />
+          <span>{{ room.players }}</span>
+        </div>
+      </div>
+
+      <button
+        class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-3 py-2 text-sm transition-all hover:scale-105"
+      >
+        <lucide-angular [img]="UserPlus" class="h-3 w-3" />
+        Quick Join
+      </button>
+    </div>
   }
-</ul>
+</div>
