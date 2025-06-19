@@ -26,8 +26,8 @@ export class LobbyComponent {
 
   hostGame() {
     this.lobbyService.createLobby().subscribe({
-      next: (res) => {
-        console.log(res);
+      next: () => {
+        this.router.navigate(['room', 'host']);
       },
     });
   }
