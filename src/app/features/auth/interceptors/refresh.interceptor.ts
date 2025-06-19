@@ -10,34 +10,37 @@ export const refreshInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((err) => {
-      if (err.status === 401) {
-        return throwError(() => err);
-      }
-
+      // If the request was to /refresh and failed, logout
       if (req.url.includes('/refresh')) {
         auth.logout();
         return throwError(() => err);
       }
 
-      return auth.updateToken().pipe(
-        switchMap(() => {
-          const newToken = tokenService.accessToken();
+      // If 401, try to refresh
+      if (err.status === 401) {
+        return auth.updateToken().pipe(
+          switchMap(() => {
+            const newToken = tokenService.accessToken();
 
-          if (!newToken) {
+            if (!newToken) {
+              auth.logout();
+              return throwError(() => err);
+            }
+
+            const retryReq = req.clone({
+              setHeaders: { Authorization: `Bearer ${newToken}` },
+            });
+            return next(retryReq);
+          }),
+          catchError((refreshErr) => {
             auth.logout();
-            return throwError(() => err);
-          }
+            return throwError(() => refreshErr);
+          }),
+        );
+      }
 
-          const retryReq = req.clone({
-            setHeaders: { Authorization: `Bearer ${newToken}` },
-          });
-          return next(retryReq);
-        }),
-        catchError((refreshErr) => {
-          auth.logout();
-          return throwError(() => refreshErr);
-        }),
-      );
+      // For other errors, just throw
+      return throwError(() => err);
     }),
   );
 };
