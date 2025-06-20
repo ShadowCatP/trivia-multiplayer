@@ -4,10 +4,12 @@ import { RegisterComponent } from './features/auth/components/register/register.
 import { authGuard } from './features/auth/guards/auth.guard';
 import { HostRoomComponent } from './features/lobby/components/host-room/host-room.component';
 import { LobbyComponent } from './features/lobby/components/lobby/lobby.component';
+import { LogoutComponent } from './shared/components/logout/logout.component';
 
 export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'login', component: LoginComponent },
   { path: '', component: LobbyComponent, canActivate: [authGuard] },
   { path: 'room/host', component: HostRoomComponent, canActivate: [authGuard] },
+  { path: 'room/:id', component: LogoutComponent, canActivate: [authGuard] },
 ];

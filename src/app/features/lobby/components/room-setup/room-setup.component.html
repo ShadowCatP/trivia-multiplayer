@@ -1,0 +1,188 @@
+<form
+  [formGroup]="roomForm"
+  (ngSubmit)="onSubmit()"
+  class="rounded-2xl border border-white/20 bg-white/10 p-6 text-white shadow-2xl"
+>
+  <h2 class="mb-6 text-xl font-semibold">Room Configuration</h2>
+  <div class="grid grid-cols-1 gap-6">
+    <!-- Room Name -->
+    <div>
+      <label
+        for="roomName"
+        class="mb-2 block text-sm font-medium text-slate-300"
+        >Room Name</label
+      >
+      <input
+        id="roomName"
+        name="roomName"
+        type="text"
+        formControlName="roomName"
+        placeholder="Enter room name..."
+        class="w-full rounded-lg border border-white/20 bg-black/20 px-4 py-3 placeholder-slate-400 transition-all duration-300 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none"
+      />
+    </div>
+
+    <!-- Max Players -->
+    <div>
+      <label
+        for="maxPlayers"
+        class="mb-2 block text-sm font-medium text-slate-300"
+        >Max Players</label
+      >
+      <select
+        id="maxPlayers"
+        name="maxPlayers"
+        formControlName="maxPlayers"
+        class="w-full rounded-lg border border-white/20 bg-black/20 px-4 py-3 placeholder-slate-400 transition-all duration-300 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none"
+      >
+        @for (num of maxPlayersOptions; track $index) {
+          <option [value]="num">{{ num }} players</option>
+        }
+      </select>
+    </div>
+
+    <!-- Questions Time Limit -->
+    <div>
+      <label
+        for="questionTimeLimit"
+        class="mb-2 block text-sm font-medium text-slate-300"
+        >Question Time Limit</label
+      >
+      <select
+        id="questionTimeLimit"
+        name="questionTimeLimit"
+        formControlName="questionTimeLimit"
+        class="w-full rounded-lg border border-white/20 bg-black/20 px-4 py-3 placeholder-slate-400 transition-all duration-300 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none"
+      >
+        @for (sec of questionsTimeOptions; track $index) {
+          <option [value]="sec">{{ sec }} seconds</option>
+        }
+      </select>
+    </div>
+
+    <!-- Room Visibility -->
+    <div>
+      <!-- Room Visibility Toggle -->
+      <label class="mb-3 block text-sm font-medium text-slate-300"
+        >Room Visibility</label
+      >
+
+      <div
+        class="relative cursor-pointer rounded-2xl border border-white/20 bg-black/30 p-2 transition-all duration-300 hover:border-white/30"
+        (click)="toggleBoolean('isPublic')"
+      >
+        <div class="relative flex">
+          <!-- Sliding Background -->
+          <div
+            class="absolute top-0 bottom-0 w-1/2 rounded-xl transition-all duration-300 ease-out"
+            [ngClass]="
+              roomForm.get('isPublic')?.value
+                ? 'left-0 bg-green-600'
+                : 'left-1/2 bg-orange-600'
+            "
+          ></div>
+
+          <!-- Public Option -->
+          <div
+            class="relative z-10 flex flex-1 items-center justify-center gap-3 rounded-xl px-6 py-4 transition-all duration-300"
+            [ngClass]="
+              roomForm.get('isPublic')?.value
+                ? 'text-white'
+                : 'text-slate-400 hover:text-slate-300'
+            "
+          >
+            <lucide-angular [img]="Globe" class="h-6 w-6" />
+            <span class="text-base font-medium">Public</span>
+          </div>
+
+          <!-- Private Option -->
+          <div
+            class="relative z-10 flex flex-1 items-center justify-center gap-3 rounded-xl px-6 py-4 transition-all duration-300"
+            [ngClass]="
+              !roomForm.get('isPublic')?.value
+                ? 'text-white'
+                : 'text-slate-400 hover:text-slate-300'
+            "
+          >
+            <lucide-angular [img]="Lock" class="h-6 w-6" />
+            <span class="text-base font-medium">Private</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Options -->
+  <div class="mt-6 space-y-4">
+    <div
+      class="flex items-center justify-between rounded-lg border border-white/10 bg-black/20 p-4"
+    >
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="Shuffle" class="h-5 w-5 text-purple-400" />
+        <div>
+          <p class="font-medium text-white">Shuffle Questions</p>
+          <p class="text-sm text-slate-400">Randomize question order</p>
+        </div>
+      </div>
+      <label class="inline-flex cursor-pointer items-center">
+        <input
+          type="checkbox"
+          class="sr-only"
+          formControlName="shuffleQuestions"
+        />
+        <div
+          class="relative h-6 w-11 rounded-full bg-gray-600 transition-colors duration-300"
+          [class.bg-purple-600]="roomForm.get('shuffleQuestions')?.value"
+        >
+          <div
+            class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform"
+            [class.translate-x-full]="roomForm.get('shuffleQuestions')?.value"
+          ></div>
+        </div>
+      </label>
+    </div>
+
+    <div
+      class="flex items-center justify-between rounded-lg border border-white/10 bg-black/20 p-4"
+    >
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="Eye" class="h-5 w-5 text-green-400" />
+        <div>
+          <p class="font-medium text-white">Show Answers After Each Question</p>
+          <p class="text-sm text-slate-400">
+            Reveal answer before next question
+          </p>
+        </div>
+      </div>
+      <label class="inline-flex cursor-pointer items-center">
+        <input
+          type="checkbox"
+          class="sr-only"
+          formControlName="showAnswersAfterQuestion"
+        />
+        <div
+          class="relative h-6 w-11 rounded-full bg-gray-600 transition-colors duration-300"
+          [class.bg-green-600]="roomForm.get('showAnswersAfterQuestion')?.value"
+        >
+          <div
+            class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform"
+            [class.translate-x-full]="
+              roomForm.get('showAnswersAfterQuestion')?.value
+            "
+          ></div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+  <!-- Next Section -->
+  <div class="mt-8 flex justify-end">
+    <button
+      type="submit"
+      [disabled]="roomForm.invalid"
+      class="transform rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-3 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-purple-500 hover:to-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      Next: Add Questions
+    </button>
+  </div>
+</form>

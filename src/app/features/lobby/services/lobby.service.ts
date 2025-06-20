@@ -3,6 +3,17 @@ import { inject, Injectable } from '@angular/core';
 import { TokenService } from '../../auth/services/token.service';
 import { io } from 'socket.io-client';
 import { Observable } from 'rxjs';
+import { RoomSettings } from '../types/RoomSettings';
+import { ValidQuestion } from '../types/Question';
+
+type CreatedRoomResponse = {
+  id: string;
+  roomName: string;
+  host: string;
+  isPublic: boolean;
+  inviteCode: string;
+  players: number;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -13,12 +24,12 @@ export class LobbyService {
   private readonly token = this.tokenService.accessToken();
   private readonly socket = io('ws://localhost:5001');
 
-  createLobby() {
-    return this.http.post(
+  createLobby(roomSettings: RoomSettings, questions: ValidQuestion[]) {
+    return this.http.post<CreatedRoomResponse>(
       'http://localhost:5001/api/rooms',
       {
-        room_name: 'test',
-        public: true,
+        roomSettings,
+        questions,
       },
       {
         headers: {

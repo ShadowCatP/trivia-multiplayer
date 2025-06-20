@@ -1,9 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { LucideAngularModule, Gamepad2, Users, Zap } from 'lucide-angular';
-import { RoomsListComponent } from '../rooms-list/rooms-list.component';
 import { Router } from '@angular/router';
-import { LobbyService } from '../../services/lobby.service';
+import { Gamepad2, LucideAngularModule, Users, Zap } from 'lucide-angular';
+import { RoomsListComponent } from '../rooms-list/rooms-list.component';
 
 @Component({
   selector: 'app-lobby',
@@ -16,7 +15,6 @@ export class LobbyComponent {
   readonly Users = Users;
   readonly Zap = Zap;
   private router = inject(Router);
-  private lobbyService = inject(LobbyService);
 
   roomCodeForm = new FormGroup({
     roomId: new FormControl(''),
@@ -25,10 +23,6 @@ export class LobbyComponent {
   onJoin() {}
 
   hostGame() {
-    this.lobbyService.createLobby().subscribe({
-      next: () => {
-        this.router.navigate(['room', 'host']);
-      },
-    });
+    this.router.navigate(['room', 'host']);
   }
 }

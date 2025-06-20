@@ -1,0 +1,156 @@
+<div
+  class="rounded-2xl border border-white/20 bg-white/10 p-6 text-white shadow-2xl"
+>
+  <h2 class="mb-6 text-xl font-semibold">Review Your Trivia Game</h2>
+
+  <div class="mb-8 grid grid-cols-1 gap-6">
+    <!-- Room Settings -->
+    <div class="space-y-4">
+      <h3 class="flex items-center gap-2 text-lg font-medium">
+        <lucide-angular [img]="Settings" class="h-5 w-5" />
+        Room Settings
+      </h3>
+      <div class="space-y-3 rounded-lg bg-black/20 p-4">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Room Name:</span>
+          <span class="font-medium">{{ roomSettings.roomName }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Max Players:</span>
+          <span class="font-medium">{{ roomSettings.maxPlayers }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Visibility:</span>
+          <span class="flex items-center gap-1 font-medium">
+            @if (roomSettings.isPublic) {
+              <lucide-angular [img]="Globe" class="h-4 w-4" />
+              Public
+            } @else {
+              <lucide-angular [img]="Lock" class="h-4 w-4" />
+              Private
+            }
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Question Time:</span>
+          <span class="font-medium">{{ roomSettings.questionTimeLimit }}s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Options -->
+    <div class="space-y-4">
+      <h3 class="flex items-center gap-2 text-lg font-medium">
+        <lucide-angular [img]="Trophy" class="h-5 w-5" />
+        Game Options
+      </h3>
+    </div>
+    <div class="space-y-3 rounded-lg bg-black/20 p-4">
+      <div class="flex justify-between">
+        <span class="text-slate-400">Shuffle Questions:</span>
+        <span class="font-medium">{{
+          roomSettings.shuffleQuestions ? "Yes" : "No"
+        }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-400">Show Answers:</span>
+        <span class="font-medium">
+          {{ roomSettings.showAnswersAfterQuestion ? "Yes" : "No" }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Questions Preview -->
+  <div class="mb-8">
+    <h3 class="mb-4 flex items-center gap-2 text-lg font-medium">
+      <lucide-angular [img]="Eye" class="h-5 w-5" />
+      Questions Preview
+    </h3>
+
+    <div class="max-h-60 space-y-3 overflow-y-auto">
+      @for (q of validQuestions; track q.id) {
+        <div class="rounded-lg bg-black/20 p-4">
+          <div class="mb-2 flex items-center gap-2">
+            <p class="font-medium">{{ $index + 1 }}. {{ q.question }}</p>
+            <span
+              class="rounded-full px-2 py-1 text-xs"
+              [ngClass]="{
+                'bg-purple-500/20 text-purple-300':
+                  q.type === 'multiple-choice',
+                'bg-blue-500/20 text-blue-300': q.type === 'true-false',
+              }"
+              >{{ q.type === "multiple-choice" ? "MC" : "T/F" }}</span
+            >
+          </div>
+
+          @if (q.type === "multiple-choice") {
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              @for (
+                answer of getTrimmedAnswers(q.answers);
+                track $index;
+                let ai = $index
+              ) {
+                <span
+                  class="rounded px-2 py-1"
+                  [ngClass]="{
+                    'border border-green-500/30 bg-green-500/50 text-green-300':
+                      ai === q.correctAnswer,
+                    'bg-slate-700 text-slate-300': ai !== q.correctAnswer,
+                  }"
+                  >{{ answer }}</span
+                >
+              }
+            </div>
+          } @else {
+            <div class="flex gap-2 text-sm">
+              <span
+                class="rounded px-3 py-1"
+                [ngClass]="{
+                  'border border-green-500/30 bg-green-500/50 text-green-300':
+                    q.correctAnswer === 0,
+                  'bg-slate-700 text-slate-300': q.correctAnswer !== 0,
+                }"
+                >True</span
+              >
+              <span
+                class="rounded px-3 py-1"
+                [ngClass]="{
+                  'border border-green-500/30 bg-green-500/20 text-green-300':
+                    q.correctAnswer === 1,
+                  'bg-slate-700 text-slate-300': q.correctAnswer !== 1,
+                }"
+                >False</span
+              >
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Nav Buttons -->
+  <div class="flex justify-between">
+    <button
+      (click)="back.emit()"
+      class="rounded-xl border border-white/20 bg-white/10 px-6 py-3 transition-colors duration-300 hover:bg-white/20"
+    >
+      Back To Questions
+    </button>
+    <button
+      (click)="next.emit()"
+      [disabled]="isCreating || validQuestions.length === 0"
+      class="flex transform items-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-teal-600 px-8 py-3 font-semibold transition-all duration-300 hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed disabled:from-gray-600 disabled:to-gray-700"
+    >
+      @if (isCreating) {
+        <div
+          class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+        ></div>
+        Creating Room...
+      } @else {
+        <lucide-angular [img]="Play" class="h-5 w-5" />
+        Create Trivia Room
+      }
+    </button>
+  </div>
+</div>

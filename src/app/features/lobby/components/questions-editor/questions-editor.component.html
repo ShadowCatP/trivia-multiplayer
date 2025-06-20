@@ -1,0 +1,239 @@
+<div class="space-y-6 text-white">
+  <!-- Question Type Overlay -->
+  @if (showQuestionsTypeModel) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+    >
+      <div
+        class="w-full max-w-md rounded-2xl border border-white/20 bg-black/30 p-6 shadow-2xl"
+      >
+        <h3 class="mb-6 text-center text-xl font-semibold">
+          Choose Question Type
+        </h3>
+
+        <div class="mb-6 grid grid-cols-1 gap-4">
+          <button
+            (click)="addQuestion('multiple-choice')"
+            class="transform rounded-xl border border-purple-400/30 bg-gradient-to-br from-purple-500/70 to-pink-500/70 p-6 text-left transition-all duration-300 hover:scale-105 hover:border-purple-400/50"
+          >
+            <div class="flex items-center gap-4">
+              <div
+                class="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500"
+              >
+                <div class="space-y-1">
+                  @for (_ of [1, 2, 3, 4]; track $index) {
+                    <div class="flex gap-1">
+                      @if ($index === 0) {
+                        <div class="h-2 w-2 rounded-full bg-white"></div>
+                      } @else {
+                        <div class="h-2 w-2 rounded-full bg-white/30"></div>
+                      }
+                      <div class="mt-0.5 h-0.5 w-6 rounded bg-white/60"></div>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="flex-1">
+                <h4 class="mb-1 text-lg font-semibold">Multiple Choice</h4>
+                <p class="text-sm text-slate-300">
+                  Question with 4 answer options
+                </p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            (click)="addQuestion('true-false')"
+            class="transform rounded-xl border border-blue-400/30 bg-gradient-to-br from-blue-500/70 to-cyan-500/70 p-6 text-left transition-all duration-300 hover:scale-105 hover:border-blue-400/50"
+          >
+            <div class="flex items-center gap-4">
+              <div
+                class="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500"
+              >
+                <div class="flex items-center">
+                  <lucide-angular
+                    [img]="Check"
+                    class="mb-1 h-5 w-5 text-white"
+                  />
+
+                  <div
+                    class="mb-1 h-0.5 w-4 -rotate-60 transform rounded bg-white"
+                  ></div>
+
+                  <div class="mb-1 flex h-5 w-5 items-center justify-center">
+                    <div
+                      class="h-0.5 w-4 rotate-45 transform rounded bg-white"
+                    ></div>
+                    <div
+                      class="-ml-4 h-0.5 w-4 -rotate-45 transform rounded bg-white"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h4 class="mb-1 text-lg font-semibold">True / False</h4>
+                <p class="text-sm text-slate-300">
+                  Simple true or false question
+                </p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            (click)="showQuestionsTypeModel = false"
+            class="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 transition-colors duration-300 hover:bg-white/20"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Main Gui -->
+  <form
+    [formGroup]="questionForm"
+    (ngSubmit)="onSubmit()"
+    class="rounded-2xl border border-white/20 bg-white/10 p-6 shadow-2xl"
+  >
+    <div class="mb-6 flex items-center justify-between">
+      <h2 class="text-xl font-semibold">Trivia Questions</h2>
+      <div class="flex items-center gap-4">
+        <button
+          type="button"
+          (click)="showQuestionsTypeModel = true"
+          class="flex transform items-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2 transition-all duration-300 hover:scale-105"
+        >
+          <span>+</span>
+          Add Question
+        </button>
+      </div>
+    </div>
+
+    <div class="space-y-6" formArrayName="questions">
+      @for (
+        question of questions.controls;
+        track question.value.id;
+        let i = $index
+      ) {
+        <div
+          class="rounded-lg border border-white/10 bg-black/20 p-6"
+          [formGroupName]="i"
+        >
+          <div class="mb-4 flex items-center">
+            <div class="flex w-full items-center justify-between gap-3">
+              <h3 class="text-lg font-medium">Question {{ i + 1 }}</h3>
+              <span
+                class="rounded-full border px-3 py-1 text-xs font-medium"
+                [ngClass]="{
+                  'border-purple-400/30 bg-purple-500/20 text-purple-300':
+                    question.value.type === 'multiple-choice',
+                  'border-blue-400/30 bg-blue-500/20 text-blue-300':
+                    question.value.type === 'true-false',
+                }"
+              >
+                {{
+                  question.value.type === "multiple-choice"
+                    ? "Multiple Choice"
+                    : "True/False"
+                }}</span
+              >
+            </div>
+            @if (questions.length > 1) {
+              <button
+                type="button"
+                (click)="removeQuestion(i)"
+                class="rounded p-2 text-red-400 transition-colors duration-300 hover:bg-red-400/10 hover:text-red-300"
+              >
+                <lucide-angular [img]="Trash2" />
+              </button>
+            }
+          </div>
+
+          <input
+            type="text"
+            formControlName="question"
+            placeholder="Enter your question..."
+            class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 placeholder-slate-400 transition-all duration-300 focus:ring-2 focus:ring-purple-400/20 focus:outline-none"
+          />
+
+          @if (question.value.type === "multiple-choice") {
+            <div class="mt-4 grid grid-cols-1 gap-3">
+              @for (
+                answer of getAnswers(question).controls;
+                track $index;
+                let j = $index
+              ) {
+                <div class="flex items-center gap-3">
+                  <button
+                    type="button"
+                    class="h-6 w-6 rounded-full border-2"
+                    [ngClass]="{
+                      'border-green-500 bg-green-500':
+                        question.value.correctAnswer === j,
+                      'border-white/30 hover:border-green-400':
+                        question.value.correctAnswer !== j,
+                    }"
+                    (click)="question.get('correctAnswer')?.setValue(j)"
+                  >
+                    @if (question.value.correctAnswer === j) {
+                      <span class="text-sm">
+                        <lucide-angular [img]="Check" />
+                      </span>
+                    }
+                  </button>
+                  <input
+                    type="text"
+                    [formControl]="answer"
+                    placeholder="Answer {{ j + 1 }}..."
+                    class="border-border-white/20 flex-1 rounded-lg bg-white/5 px-3 py-2 placeholder-slate-400"
+                  />
+                </div>
+              }
+            </div>
+          }
+
+          @if (question.value.type === "true-false") {
+            <div class="mt-4 flex justify-center gap-4">
+              @for (option of ["True", "False"]; track $index; let j = $index) {
+                <button
+                  type="button"
+                  (click)="question.get('correctAnswer')?.setValue(j)"
+                  class="flex items-center gap-3 rounded-xl border-2 px-6 py-4 transition-all duration-300"
+                  [ngClass]="{
+                    'border-green-500 bg-green-500/20 text-green-300':
+                      question.value.correctAnswer === 0 && j === 0,
+                    'border-red-500 bg-red-500/20 text-red-300':
+                      question.value.correctAnswer === 1 && j === 1,
+                    'border-white/30 text-slate-400 hover:border-white/50 hover:text-white':
+                      question.value.correctAnswer !== j,
+                  }"
+                >
+                  {{ option }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-8 flex justify-between">
+      <button
+        type="button"
+        (click)="back.emit()"
+        class="rounded-xl border border-white/20 bg-white/10 px-6 py-3 transition-colors duration-300 hover:bg-white/20"
+      >
+        Back to Setup
+      </button>
+      <button
+        type="submit"
+        [disabled]="questionForm.invalid"
+        class="transform rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-3 font-semibold transition-all duration-300 hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed disabled:from-gray-600 disabled:to-gray-700"
+      >
+        Review & Create
+      </button>
+    </div>
+  </form>
+</div>

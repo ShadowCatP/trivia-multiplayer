@@ -1,1 +1,68 @@
-<p>host-room works!</p>
+<div class="mx-auto my-6 max-w-4xl">
+  <div class="mb-8 text-center text-white">
+    <div class="mb-4 inline-flex items-center gap-3">
+      <div
+        class="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-3"
+      >
+        <lucide-angular [img]="HelpCircle" class="h-8 w-8" />
+      </div>
+      <h2 class="text-3xl font-bold">Host Trivia Game</h2>
+    </div>
+    <p class="text-slate-400">Create your custom trivia</p>
+  </div>
+
+  <!-- Step Progress Bar -->
+  <div class="mb-8 flex items-center justify-center text-white">
+    <div class="flex items-center">
+      @for (step of steps; track step.key; let i = $index) {
+        <div class="flex items-center">
+          <div
+            class="flex items-center gap-2 rounded-full px-4 py-2 transition-all duration-300"
+            [ngClass]="{
+              'bg-purple-600 text-white': isStepActive(step.key),
+              'bg-green-600 text-white': isStepCompleted(step.key),
+              'bg-white/10 text-slate-400':
+                !isStepActive(step.key) && !isStepCompleted(step.key),
+            }"
+          >
+            <lucide-angular [img]="step.icon" class="h-4 w-4" />
+            <span class="text-sm font-medium">{{ step.label }}</span>
+          </div>
+
+          @if (i < steps.length - 1) {
+            <div
+              class="h-0.5 w-8"
+              [ngClass]="{
+                'bg-green-600': isStepCompleted(steps[i + 1].key),
+                'bg-white/20': !isStepCompleted(steps[i + 1].key),
+              }"
+            ></div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (currentStep === "setup") {
+    <app-room-setup
+      [initialValues]="roomSettings"
+      (next)="handleRoomSetupNext($event)"
+    />
+  }
+  @if (currentStep === "questions") {
+    <app-questions-editor
+      [initialValues]="validQuestions"
+      (back)="goToStep('setup')"
+      (next)="handleQuestionsNext($event)"
+    />
+  }
+  @if (currentStep === "review") {
+    <app-review
+      [roomSettings]="roomSettings"
+      [validQuestions]="validQuestions"
+      [isCreating]="isCreating"
+      (back)="goToStep('questions')"
+      (next)="createRoom()"
+    />
+  }
+</div>
