@@ -38,6 +38,7 @@ export class HostRoomComponent {
   roomSettings!: RoomSettings;
   validQuestions: ValidQuestion[] = [];
   isCreating = false;
+  error: string | null = null;
 
   readonly steps: Step[] = [
     { key: 'setup', label: 'Room Setup', icon: Settings },
@@ -81,11 +82,11 @@ export class HostRoomComponent {
           if (roomId) {
             this.router.navigate(['room', roomId]);
           } else {
-            console.error('No room ID returned from the server'); // TODO change it to showing error in gui
+            this.error = 'Server is down. Please try again later.';
           }
         },
         error: (err) => {
-          console.error(err); // TODO change it to showing error in gui
+          this.error = 'Something went wrong. Please try again later.';
           this.isCreating = false;
         },
       });

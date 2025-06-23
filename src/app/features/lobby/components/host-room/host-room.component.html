@@ -43,6 +43,14 @@
     </div>
   </div>
 
+  @if (error) {
+    <div
+      class="mb-6 flex items-center justify-center rounded border border-red-500/50 bg-red-400/70 px-4 py-3 text-white"
+    >
+      {{ error }}
+    </div>
+  }
+
   @if (currentStep === "setup") {
     <app-room-setup
       [initialValues]="roomSettings"

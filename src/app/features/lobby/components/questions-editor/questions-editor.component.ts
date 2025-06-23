@@ -54,7 +54,9 @@ export class QuestionsEditorComponent implements OnInit {
           id: [q.id || crypto.randomUUID()],
           type: [q.type],
           question: [q.question, Validators.required],
-          answers: this.fb.array(q.answers),
+          answers: this.fb.array(
+            q.answers.map((a: any) => this.fb.control(a, Validators.required)),
+          ),
           correctAnswer: [q.correctAnswer],
         }),
       );
@@ -72,8 +74,16 @@ export class QuestionsEditorComponent implements OnInit {
   createQuestion(type: QuestionType): FormGroup {
     const answers =
       type === 'multiple-choice'
-        ? this.fb.array(['', '', '', ''])
-        : this.fb.array(['True', 'False']);
+        ? this.fb.array(
+            ['', '', '', ''].map((a) =>
+              this.fb.control(a, Validators.required),
+            ),
+          )
+        : this.fb.array(
+            ['True', 'False'].map((a) =>
+              this.fb.control(a, Validators.required),
+            ),
+          );
 
     return this.fb.group({
       id: [crypto.randomUUID()],

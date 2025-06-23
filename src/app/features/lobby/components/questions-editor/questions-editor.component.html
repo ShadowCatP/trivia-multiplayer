@@ -157,6 +157,13 @@
             class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 placeholder-slate-400 transition-all duration-300 focus:ring-2 focus:ring-purple-400/20 focus:outline-none"
           />
 
+          @if (
+            question.get("question")?.invalid &&
+            question.get("question")?.touched
+          ) {
+            <p class="mt-2 px-1 text-sm text-red-400">Question is required.</p>
+          }
+
           @if (question.value.type === "multiple-choice") {
             <div class="mt-4 grid grid-cols-1 gap-3">
               @for (
@@ -164,30 +171,38 @@
                 track $index;
                 let j = $index
               ) {
-                <div class="flex items-center gap-3">
-                  <button
-                    type="button"
-                    class="h-6 w-6 rounded-full border-2"
-                    [ngClass]="{
-                      'border-green-500 bg-green-500':
-                        question.value.correctAnswer === j,
-                      'border-white/30 hover:border-green-400':
-                        question.value.correctAnswer !== j,
-                    }"
-                    (click)="question.get('correctAnswer')?.setValue(j)"
-                  >
-                    @if (question.value.correctAnswer === j) {
-                      <span class="text-sm">
-                        <lucide-angular [img]="Check" />
-                      </span>
-                    }
-                  </button>
-                  <input
-                    type="text"
-                    [formControl]="answer"
-                    placeholder="Answer {{ j + 1 }}..."
-                    class="border-border-white/20 flex-1 rounded-lg bg-white/5 px-3 py-2 placeholder-slate-400"
-                  />
+                <div>
+                  <div class="flex items-center gap-3">
+                    <button
+                      type="button"
+                      class="h-6 w-6 rounded-full border-2"
+                      [ngClass]="{
+                        'border-green-500 bg-green-500':
+                          question.value.correctAnswer === j,
+                        'border-white/30 hover:border-green-400':
+                          question.value.correctAnswer !== j,
+                      }"
+                      (click)="question.get('correctAnswer')?.setValue(j)"
+                    >
+                      @if (question.value.correctAnswer === j) {
+                        <span class="text-sm">
+                          <lucide-angular [img]="Check" />
+                        </span>
+                      }
+                    </button>
+                    <input
+                      type="text"
+                      [formControl]="answer"
+                      placeholder="Answer {{ j + 1 }}..."
+                      class="border-border-white/20 flex-1 rounded-lg bg-white/5 px-3 py-2 placeholder-slate-400"
+                    />
+                  </div>
+
+                  @if (answer.invalid && answer.touched) {
+                    <p class="mt-2 px-1 text-sm text-red-400">
+                      Answer is required.
+                    </p>
+                  }
                 </div>
               }
             </div>
