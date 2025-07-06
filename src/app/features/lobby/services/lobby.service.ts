@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { TokenService } from '../../auth/services/token.service';
-import { io } from 'socket.io-client';
 import { Observable } from 'rxjs';
-import { RoomSettings } from '../types/RoomSettings';
+import { io } from 'socket.io-client';
+import { TokenService } from '../../auth/services/token.service';
 import { ValidQuestion } from '../types/Question';
+import { RoomSettings } from '../types/RoomSettings';
 
 type CreatedRoomResponse = {
   id: string;
@@ -58,6 +58,28 @@ export class LobbyService {
         this.socket.disconnect();
       };
     });
+  }
+
+  getRoomByInviteCode(inviteCode: string) {
+    return this.http.get<{ roomId: string }>(
+      `http://localhost:5001/api/rooms/invite/${inviteCode}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      },
+    );
+  }
+
+  getInviteCodeById(roomId: string) {
+    return this.http.get<{ inviteCode: string }>(
+      `http://localhost:5001/api/rooms/${roomId}/invite`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      },
+    );
   }
 
   constructor() {}

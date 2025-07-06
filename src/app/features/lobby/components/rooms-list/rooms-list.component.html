@@ -32,6 +32,7 @@
 
         <button
           class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm transition-all hover:scale-105 hover:bg-teal-500"
+          (click)="quickJoin(room.id)"
         >
           <lucide-angular [img]="UserPlus" class="h-3 w-3" />
           Quick Join

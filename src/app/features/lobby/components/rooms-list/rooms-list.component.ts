@@ -1,13 +1,14 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { LobbyService } from '../../services/lobby.service';
-import { Room } from '../../types/Room';
+import { Router } from '@angular/router';
 import {
+  Crown,
   Globe,
   LucideAngularModule,
-  Crown,
-  Users,
   UserPlus,
+  Users,
 } from 'lucide-angular';
+import { LobbyService } from '../../services/lobby.service';
+import { Room } from '../../types/Room';
 
 @Component({
   selector: 'app-rooms-list',
@@ -22,6 +23,7 @@ export class RoomsListComponent implements OnInit {
   readonly UserPlus = UserPlus;
 
   private readonly lobbyService = inject(LobbyService);
+  private readonly router = inject(Router);
 
   rooms: Room[] = [];
 
@@ -39,12 +41,15 @@ export class RoomsListComponent implements OnInit {
     // subscribe to further updates from the server
     this.lobbyService.getRooms().subscribe({
       next: (res: any) => {
-        console.log(res);
         this.rooms = res;
       },
       error: (err) => {
         console.error('Error loading rooms: ', err);
       },
     });
+  }
+
+  quickJoin(roomId: string) {
+    this.router.navigate(['/room', roomId]);
   }
 }
