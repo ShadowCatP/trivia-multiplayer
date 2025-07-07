@@ -12,5 +12,5 @@ export class UsersListComponent {
   readonly Crown = Crown;
 
   @Input() users: string[] = [];
-  @Input() host: string = '';
+  @Input() host: string | null = null;
 }

@@ -6,3 +6,8 @@ export type Room = {
   inviteCode: string;
   players: number;
 };
+
+export interface RoomState {
+  users: string[];
+  host: string | null;
+}

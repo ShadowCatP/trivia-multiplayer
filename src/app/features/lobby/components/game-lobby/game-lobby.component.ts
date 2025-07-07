@@ -1,11 +1,11 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { Subscription } from 'rxjs';
+import { RoomService } from '../../services/room.service';
+import { RoomState } from '../../types/Room';
 import { InviteCodeComponent } from '../invite-code/invite-code.component';
 import { UsersListComponent } from '../users-list/users-list.component';
-import { ActivatedRoute } from '@angular/router';
-import { LobbyService } from '../../services/lobby.service';
-import { RoomService } from '../../services/room.service';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-game-lobby',
@@ -20,6 +20,8 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly sub = new Subscription();
 
+  roomState: RoomState = { users: [], host: null };
+
   private roomId = this.route.snapshot.paramMap.get('id');
 
   constructor() {}
@@ -27,11 +29,11 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.roomService.joinRoom(this.roomId!);
 
-    const usersSub = this.roomService.getUsers().subscribe((users) => {
-      this.users = users;
+    const sub = this.roomService.roomState$.subscribe((state) => {
+      this.roomState = state;
     });
 
-    this.sub.add(usersSub);
+    this.sub.add(sub);
   }
 
   ngOnDestroy(): void {
