@@ -5,6 +5,7 @@ import { io } from 'socket.io-client';
 import { TokenService } from '../../auth/services/token.service';
 import { ValidQuestion } from '../types/Question';
 import { RoomSettings } from '../types/RoomSettings';
+import { Room } from '../types/Room';
 
 type CreatedRoomResponse = {
   id: string;
@@ -72,14 +73,11 @@ export class LobbyService {
   }
 
   getInviteCodeById(roomId: string) {
-    return this.http.get<{ inviteCode: string }>(
-      `http://localhost:5001/api/rooms/${roomId}/invite`,
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
+    return this.http.get<Room>(`http://localhost:5001/api/rooms/${roomId}`, {
+      headers: {
+        Authorization: `Bearer ${this.token}`,
       },
-    );
+    });
   }
 
   constructor() {}
