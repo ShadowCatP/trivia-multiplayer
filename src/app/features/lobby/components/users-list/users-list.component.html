@@ -1,0 +1,12 @@
+<ul class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+  @for (user of users; track $index) {
+    <div
+      class="flex items-center justify-between rounded border border-white/40 bg-black/20 px-4 py-8"
+    >
+      <p class="text-xl font-bold">{{ user }}</p>
+      @if (user === host) {
+        <lucide-angular [img]="Crown" class="h-5 w-5 text-yellow-500" />
+      }
+    </div>
+  }
+</ul>

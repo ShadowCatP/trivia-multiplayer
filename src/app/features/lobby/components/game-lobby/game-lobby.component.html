@@ -1,11 +1,11 @@
 <div
-  class="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-2 text-white"
+  class="mx-auto flex min-h-screen max-w-screen-xl flex-col items-center gap-4 px-2 py-10 text-white"
 >
   <app-invite-code />
 
-  <ul>
-    @for (user of users; track $index) {
-      <li>{{ user }}</li>
-    }
-  </ul>
+  <div class="flex w-full flex-grow items-center justify-center">
+    <div class="w-full">
+      <app-users-list [users]="users" [host]="users[0]" />
+    </div>
+  </div>
 </div>
