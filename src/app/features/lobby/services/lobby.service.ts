@@ -80,43 +80,5 @@ export class LobbyService {
     });
   }
 
-  joinRoom(roomId: string) {
-    this.socket.emit('join_room', {
-      room_id: roomId,
-      token: this.token,
-    });
-  }
-
-  onPlayerJoined(): Observable<string[]> {
-    return new Observable((observer) => {
-      this.socket.on('user_joined', (data: string[]) => {
-        observer.next(data);
-      });
-
-      return () => {
-        this.socket.disconnect();
-      };
-    });
-  }
-
-  leaveRoom(roomId: string) {
-    this.socket.emit('leave_room', {
-      room_id: roomId,
-      token: this.token,
-    });
-  }
-
-  onPlayerLeft(): Observable<string[]> {
-    return new Observable((observer) => {
-      this.socket.on('user_left', (data: string[]) => {
-        observer.next(data);
-      });
-
-      return () => {
-        this.socket.disconnect();
-      };
-    });
-  }
-
   constructor() {}
 }
