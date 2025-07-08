@@ -22,7 +22,6 @@ export class RoomService {
     this.socket.on(
       'users_update',
       (data: { users: string[]; host: string }) => {
-        console.log('users update');
         this.roomStateSubject.next(data);
       },
     );

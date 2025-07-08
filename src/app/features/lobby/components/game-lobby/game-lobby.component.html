@@ -1,5 +1,5 @@
 <div
-  class="mx-auto flex min-h-screen max-w-screen-xl flex-col items-center gap-4 px-2 py-10 text-white"
+  class="mx-auto flex min-h-[calc(100vh-64px)] max-w-screen-xl flex-col items-center gap-4 px-2 py-10 text-white"
 >
   <app-invite-code />
 
@@ -8,4 +8,14 @@
       <app-users-list [users]="roomState.users" [host]="roomState.host" />
     </div>
   </div>
+
+  @if (isHost) {
+    <button
+      class="flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 px-8 py-3 text-xl font-semibold transition-all duration-300 hover:scale-105"
+      (click)="startGame()"
+    >
+      <lucide-angular [img]="Play" class="h-5 w-5" />
+      Start
+    </button>
+  }
 </div>

@@ -92,4 +92,19 @@ export class AuthService {
   logout() {
     this.tokenService.clearTokens();
   }
+
+  getCurrentUser(): string | null {
+    const accessToken = this.tokenService.accessToken();
+
+    if (!accessToken) {
+      return null;
+    }
+
+    try {
+      const decodedToken = this.jwtHelper.decodeToken(accessToken);
+      return decodedToken?.sub || null;
+    } catch (err) {
+      return null;
+    }
+  }
 }

@@ -1,11 +1,12 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, Play } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { RoomService } from '../../services/room.service';
 import { RoomState } from '../../types/Room';
 import { InviteCodeComponent } from '../invite-code/invite-code.component';
 import { UsersListComponent } from '../users-list/users-list.component';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-game-lobby',
@@ -14,11 +15,14 @@ import { UsersListComponent } from '../users-list/users-list.component';
   styleUrl: './game-lobby.component.css',
 })
 export class GameLobbyComponent implements OnInit, OnDestroy {
-  users: string[] = [];
+  isHost = false;
 
   private readonly roomService = inject(RoomService);
+  private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly sub = new Subscription();
+
+  readonly Play = Play;
 
   roomState: RoomState = { users: [], host: null };
 
@@ -31,6 +35,9 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
     const sub = this.roomService.roomState$.subscribe((state) => {
       this.roomState = state;
+
+      const currentUser = this.authService.getCurrentUser();
+      this.isHost = currentUser === state.host;
     });
 
     this.sub.add(sub);
@@ -39,5 +46,9 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.roomService.leaveRoom(this.roomId!);
     this.sub.unsubscribe();
+  }
+
+  startGame() {
+    console.log('Starting the game...');
   }
 }
