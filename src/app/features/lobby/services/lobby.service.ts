@@ -62,7 +62,7 @@ export class LobbyService {
   }
 
   getRoomByInviteCode(inviteCode: string) {
-    return this.http.get<{ roomId: string }>(
+    return this.http.get<{ id: string }>(
       `http://localhost:5001/api/rooms/invite/${inviteCode}`,
       {
         headers: {

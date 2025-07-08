@@ -36,8 +36,8 @@ export class MainLobbyComponent {
     }
 
     this.lobbyService.getRoomByInviteCode(inviteCode).subscribe({
-      next: ({ roomId }) => {
-        this.router.navigate(['/room', roomId]);
+      next: ({ id }) => {
+        this.router.navigate(['/room', id]);
       },
       error: (err) => {
         if (err.status === 404) {
