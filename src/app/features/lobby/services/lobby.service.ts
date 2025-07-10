@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { io } from 'socket.io-client';
 import { TokenService } from '../../auth/services/token.service';
 import { ValidQuestion } from '../types/Question';
-import { RoomSettings } from '../types/RoomSettings';
 import { Room } from '../types/Room';
+import { RoomSettings } from '../types/RoomSettings';
+import { SocketService } from './socket.service';
 
 type CreatedRoomResponse = {
   id: string;
@@ -23,7 +23,7 @@ export class LobbyService {
   private readonly http = inject(HttpClient);
   private readonly tokenService = inject(TokenService);
   private readonly token = this.tokenService.accessToken();
-  private readonly socket = io('ws://localhost:5001');
+  private readonly socket = inject(SocketService).socket;
 
   createLobby(roomSettings: RoomSettings, questions: ValidQuestion[]) {
     return this.http.post<CreatedRoomResponse>(

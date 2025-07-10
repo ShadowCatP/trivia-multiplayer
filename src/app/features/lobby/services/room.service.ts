@@ -3,12 +3,13 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { io } from 'socket.io-client';
 import { TokenService } from '../../auth/services/token.service';
 import { RoomState } from '../types/Room';
+import { SocketService } from './socket.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RoomService {
-  private readonly socket = io('ws://localhost:5001');
+  private readonly socket = inject(SocketService).socket;
   private readonly tokenService = inject(TokenService);
   private readonly token = this.tokenService.accessToken();
 
