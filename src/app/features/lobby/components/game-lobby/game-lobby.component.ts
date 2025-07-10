@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule, Play } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -31,11 +31,13 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   selectedAnswerIndex: number | null = null;
   answerSubmitted = false;
   lastAnswerResult: { correct: boolean } | null = null;
+  isGameOver = false;
 
   private readonly roomService = inject(RoomService);
   private readonly authService = inject(AuthService);
   private readonly gameService = inject(GameService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly sub = new Subscription();
 
   readonly Play = Play;
@@ -58,8 +60,9 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
     const gameSub = this.gameService.currentQuestion$.subscribe(
       (question: ValidQuestion | null) => {
-        this.currentQuestion = question;
         if (question) {
+          this.isGameOver = false;
+          this.currentQuestion = question;
           this.selectedAnswerIndex = null;
           this.answerSubmitted = false;
           this.lastAnswerResult = null;
@@ -71,9 +74,16 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
       this.lastAnswerResult = result;
     });
 
+    const gameOverSub = this.gameService.gameOver$.subscribe((data) => {
+      console.log('Game Over: ', data);
+      this.isGameOver = true;
+      this.currentQuestion = null;
+    });
+
     this.sub.add(roomSub);
     this.sub.add(gameSub);
     this.sub.add(resultSub);
+    this.sub.add(gameOverSub);
   }
 
   ngOnDestroy(): void {
@@ -105,5 +115,13 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     this.selectedAnswerIndex = index;
     this.answerSubmitted = true;
     this.gameService.submitAnswer(this.roomId!, index);
+  }
+
+  returnToLobby() {
+    this.isGameOver = false;
+  }
+
+  leaveLobby() {
+    this.router.navigate(['/']);
   }
 }
