@@ -1,15 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule, Play } from 'lucide-angular';
 import { Subscription, timer } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
-import { RoomService } from '../../services/room.service';
-import { RoomState } from '../../types/Room';
-import { InviteCodeComponent } from '../invite-code/invite-code.component';
-import { UsersListComponent } from '../users-list/users-list.component';
 import { GameService } from '../../services/game.service';
+import { RoomService } from '../../services/room.service';
 import { QuestionPayload, ValidQuestion } from '../../types/Question';
-import { CommonModule } from '@angular/common';
+import { RoomState } from '../../types/Room';
+import { GameOverComponent } from '../game-over/game-over.component';
+import { InviteCodeComponent } from '../invite-code/invite-code.component';
+import { QuestionDisplayComponent } from '../question-display/question-display.component';
+import { UsersListComponent } from '../users-list/users-list.component';
 
 @Component({
   selector: 'app-game-lobby',
@@ -18,21 +20,25 @@ import { CommonModule } from '@angular/common';
     InviteCodeComponent,
     UsersListComponent,
     CommonModule,
+    QuestionDisplayComponent,
+    GameOverComponent,
   ],
   templateUrl: './game-lobby.component.html',
   styleUrl: './game-lobby.component.css',
 })
 export class GameLobbyComponent implements OnInit, OnDestroy {
+  roomState: RoomState = { users: [], host: null };
   isHost = false;
-  countdown = 0;
-  showCountdown = false;
-  private countdownInterval: ReturnType<typeof setInterval> | undefined;
+  isGameOver = false;
   currentQuestion: ValidQuestion | null = null;
   selectedAnswerIndex: number | null = null;
   answerSubmitted = false;
   lastAnswerResult: { correct: boolean } | null = null;
-  isGameOver = false;
-  questionCountdown = 0;
+  timeRemaining = 0;
+
+  // pre-game state
+  showStartCountdown = false;
+  startCountdown = 0;
 
   private readonly roomService = inject(RoomService);
   private readonly authService = inject(AuthService);
@@ -41,103 +47,103 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly sub = new Subscription();
   private timerSub: Subscription | null = null;
+  private readonly roomId = this.route.snapshot.paramMap.get('id');
 
+  // Icons
   readonly Play = Play;
-
-  roomState: RoomState = { users: [], host: null };
-
-  private roomId = this.route.snapshot.paramMap.get('id');
 
   constructor() {}
 
   ngOnInit(): void {
     this.roomService.joinRoom(this.roomId!);
 
-    const roomSub = this.roomService.roomState$.subscribe((state) => {
-      this.roomState = state;
-
-      const currentUser = this.authService.getCurrentUser();
-      this.isHost = currentUser === state.host;
-    });
-
-    const gameSub = this.gameService.currentQuestion$.subscribe(
-      (payload: QuestionPayload | null) => {
-        this.stopTimer();
-
-        if (payload) {
-          this.isGameOver = false;
-          this.currentQuestion = payload.question;
-          this.selectedAnswerIndex = null;
-          this.answerSubmitted = false;
-          this.lastAnswerResult = null;
-
-          this.startTimer(payload.questionTimeLimit);
-        }
-      },
+    this.sub.add(
+      this.roomService.roomState$.subscribe((state) => {
+        this.roomState = state;
+        this.isHost = this.authService.getCurrentUser() === state.host;
+      }),
     );
 
-    const resultSub = this.gameService.answerResult$.subscribe((result) => {
-      this.lastAnswerResult = result;
-    });
+    this.sub.add(
+      this.gameService.currentQuestion$.subscribe((payload) =>
+        this.handleNewQuestion(payload),
+      ),
+    );
 
-    const gameOverSub = this.gameService.gameOver$.subscribe(() => {
-      this.isGameOver = true;
-      this.currentQuestion = null;
-    });
+    this.sub.add(
+      this.gameService.answerResult$.subscribe(
+        (result) => (this.lastAnswerResult = result),
+      ),
+    );
 
-    this.sub.add(roomSub);
-    this.sub.add(gameSub);
-    this.sub.add(resultSub);
-    this.sub.add(gameOverSub);
+    this.sub.add(
+      this.gameService.gameOver$.subscribe(() => this.handleGameOver()),
+    );
   }
 
   ngOnDestroy(): void {
     this.stopTimer();
     this.roomService.leaveRoom(this.roomId!);
     this.sub.unsubscribe();
-    clearInterval(this.countdownInterval);
   }
 
-  startGame() {
-    if (this.isHost) {
-      this.countdown = 5;
-      this.showCountdown = true;
+  handleStartGame() {
+    if (!this.isHost) return;
 
-      this.countdownInterval = setInterval(() => {
-        this.countdown--;
+    this.startCountdown = 3;
+    this.showStartCountdown = true;
 
-        if (this.countdown === 0) {
-          clearInterval(this.countdownInterval);
-          this.showCountdown = false;
-          this.gameService.startGame(this.roomId!);
-        }
-      }, 1000);
-    }
+    const interval = setInterval(() => {
+      this.startCountdown--;
+
+      if (this.startCountdown === 0) {
+        clearInterval(interval);
+        this.showStartCountdown = false;
+        this.gameService.startGame(this.roomId!);
+      }
+    }, 1000);
   }
 
-  selectAnswer(index: number | null) {
+  handleAnswerSelected(index: number | null) {
     if (this.answerSubmitted) return;
-
     this.selectedAnswerIndex = index;
   }
 
-  returnToLobby() {
+  handleReturnToLobby() {
     this.isGameOver = false;
   }
 
-  leaveLobby() {
+  handleLeaveLobby() {
     this.router.navigate(['/']);
   }
 
+  private handleNewQuestion(payload: QuestionPayload | null) {
+    this.stopTimer();
+    if (payload) {
+      this.isGameOver = false;
+      this.currentQuestion = payload.question;
+      this.selectedAnswerIndex = null;
+      this.answerSubmitted = false;
+      this.lastAnswerResult = null;
+      this.startTimer(payload.questionTimeLimit);
+    }
+  }
+
+  private handleGameOver() {
+    this.isGameOver = true;
+    this.currentQuestion = null;
+    this.stopTimer();
+  }
+
   private startTimer(timeLimit: number) {
-    this.questionCountdown = timeLimit;
+    this.timeRemaining = timeLimit;
 
     this.timerSub = timer(1000, 1000).subscribe(() => {
-      if (this.questionCountdown > 0) {
-        this.questionCountdown--;
+      if (this.timeRemaining > 0) {
+        this.timeRemaining--;
       }
 
-      if (this.questionCountdown === 0) {
+      if (this.timeRemaining === 0) {
         this.stopTimer();
         this.answerSubmitted = true;
         this.gameService.submitAnswer(this.roomId!, this.selectedAnswerIndex);

@@ -2,109 +2,47 @@
   class="mx-auto flex min-h-[calc(100vh-64px)] max-w-screen-xl flex-col items-center gap-4 px-2 py-10 text-white"
 >
   @if (isGameOver) {
-    <div class="flex flex-col items-center gap-8 text-center">
-      <h2 class="text-6xl font-bold tracking-wider">Game Over!</h2>
-      <p class="text-xl text-white/80">Thanks for playing.</p>
-
-      <div class="mt-4 flex flex-col gap-4 sm:flex-row">
-        <button
-          (click)="returnToLobby()"
-          class="flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-3 text-xl font-semibold transition-all duration-300 hover:scale-105"
-        >
-          Return to Lobby
-        </button>
-
-        <button
-          (click)="leaveLobby()"
-          class="flex cursor-pointer items-center gap-2 rounded-lg bg-gray-600 px-8 py-3 text-xl font-semibold transition-all duration-300 hover:scale-105 hover:bg-gray-500"
-        >
-          Main Menu
-        </button>
-      </div>
+    <app-game-over
+      (returnToLobby)="handleReturnToLobby()"
+      (leaveLobby)="handleLeaveLobby()"
+    />
+  } @else if (currentQuestion) {
+    <div class="w-full">
+      <app-question-display
+        [question]="currentQuestion"
+        [timeRemaining]="timeRemaining"
+        [selectedAnswerIndex]="selectedAnswerIndex"
+        [answerSubmitted]="answerSubmitted"
+        [lastAnswerResult]="lastAnswerResult"
+        (answerSelected)="handleAnswerSelected($event)"
+      />
     </div>
   } @else {
-    @if (currentQuestion) {
-      <div
-        class="mb-4 text-6xl font-bold"
-        [ngClass]="{
-          'animate-pulse text-red-500': countdown <= 5 && countdown > 0,
-        }"
+    <app-invite-code />
+    <div class="flex w-full flex-grow items-center justify-center">
+      <div class="w-full">
+        <app-users-list [users]="roomState.users" [host]="roomState.host" />
+      </div>
+    </div>
+
+    @if (isHost) {
+      <button
+        (click)="handleStartGame()"
+        class="flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 px-8 py-3 text-xl font-semibold transition-all duration-300 hover:scale-105"
       >
-        {{ questionCountdown }}
-      </div>
+        <lucide-angular [img]="Play" class="h-5 w-5" />
+        Start
+      </button>
+    }
 
-      <h2 class="text-5xl font-bold tracking-wider">
-        {{ currentQuestion.question }}
-      </h2>
-
-      @if (answerSubmitted && lastAnswerResult) {
+    @if (showStartCountdown) {
+      <div class="absolute inset-0 z-50 grid place-content-center bg-black/30">
         <div
-          [ngClass]="{
-            'text-green-400': lastAnswerResult.correct,
-            'text-red-400': !lastAnswerResult.correct,
-          }"
-          class="mt-4 text-3xl font-bold"
+          class="rounded-lg bg-purple-600 p-6 text-center text-2xl font-bold"
         >
-          {{ lastAnswerResult.correct ? "Correct!" : "Wrong!" }}
-        </div>
-      }
-
-      <div class="flex w-full flex-1 items-center justify-center">
-        <ul class="grid-cols grid w-full gap-4 md:grid-cols-2">
-          @for (answer of currentQuestion.answers; track $index) {
-            <button
-              class="rounded-xl border border-white/40 bg-black/20 px-12 py-6 transition-transform hover:scale-102 disabled:scale-100 disabled:cursor-not-allowed"
-              [ngClass]="{
-                'border-purple-500 bg-purple-600/30 ring-2 ring-purple-500':
-                  !answerSubmitted && $index === selectedAnswerIndex,
-                'border-green-500 bg-green-500/30 ring-2 ring-green-500':
-                  answerSubmitted &&
-                  $index === selectedAnswerIndex &&
-                  lastAnswerResult?.correct,
-                'border-red-500 bg-red-500/30 ring-2 ring-red-500':
-                  answerSubmitted &&
-                  $index === selectedAnswerIndex &&
-                  lastAnswerResult &&
-                  !lastAnswerResult.correct,
-              }"
-              [disabled]="answerSubmitted"
-              (click)="selectAnswer($index)"
-            >
-              {{ answer }}
-            </button>
-          }
-        </ul>
-      </div>
-    } @else {
-      <app-invite-code />
-
-      <div class="flex w-full flex-grow items-center justify-center">
-        <div class="w-full">
-          <app-users-list [users]="roomState.users" [host]="roomState.host" />
+          Game starting in {{ startCountdown }}...
         </div>
       </div>
-
-      @if (isHost) {
-        <button
-          class="flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 px-8 py-3 text-xl font-semibold transition-all duration-300 hover:scale-105"
-          (click)="startGame()"
-        >
-          <lucide-angular [img]="Play" class="h-5 w-5" />
-          Start
-        </button>
-      }
-
-      @if (showCountdown) {
-        <div
-          class="absolute inset-0 z-50 grid place-content-center bg-black/30"
-        >
-          <div
-            class="rounded-lg bg-purple-600 p-6 text-center text-2xl font-bold"
-          >
-            Game starting in {{ countdown }}...
-          </div>
-        </div>
-      }
     }
   }
 </div>
