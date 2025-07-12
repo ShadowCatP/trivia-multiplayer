@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TokenService } from '../../auth/services/token.service';
+import { QuestionPayload } from '../types/Question';
 import { SocketService } from './socket.service';
-import { ValidQuestion } from '../types/Question';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +11,7 @@ export class GameService {
   private readonly socket = inject(SocketService).socket;
   private readonly tokenService = inject(TokenService);
 
-  private currentQuestionSubject = new BehaviorSubject<ValidQuestion | null>(
+  private currentQuestionSubject = new BehaviorSubject<QuestionPayload | null>(
     null,
   );
   currentQuestion$ = this.currentQuestionSubject.asObservable();
@@ -23,9 +23,8 @@ export class GameService {
   gameOver$ = this.gameOverSubject.asObservable();
 
   constructor() {
-    this.socket.on('new_question', (data: { question: ValidQuestion }) => {
-      console.log(data.question);
-      this.currentQuestionSubject.next(data.question);
+    this.socket.on('new_question', (data: QuestionPayload) => {
+      this.currentQuestionSubject.next(data);
     });
 
     this.socket.on('answer_result', (data: { correct: boolean }) => {
@@ -51,7 +50,7 @@ export class GameService {
     });
   }
 
-  submitAnswer(roomId: string, answerIndex: number) {
+  submitAnswer(roomId: string, answerIndex: number | null) {
     const token = this.tokenService.accessToken();
     this.socket.emit('submit_answer', {
       room_id: roomId,

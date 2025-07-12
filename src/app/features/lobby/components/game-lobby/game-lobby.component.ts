@@ -1,14 +1,14 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule, Play } from 'lucide-angular';
-import { Subscription } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { RoomService } from '../../services/room.service';
 import { RoomState } from '../../types/Room';
 import { InviteCodeComponent } from '../invite-code/invite-code.component';
 import { UsersListComponent } from '../users-list/users-list.component';
 import { GameService } from '../../services/game.service';
-import { ValidQuestion } from '../../types/Question';
+import { QuestionPayload, ValidQuestion } from '../../types/Question';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -32,6 +32,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   answerSubmitted = false;
   lastAnswerResult: { correct: boolean } | null = null;
   isGameOver = false;
+  questionCountdown = 0;
 
   private readonly roomService = inject(RoomService);
   private readonly authService = inject(AuthService);
@@ -39,6 +40,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sub = new Subscription();
+  private timerSub: Subscription | null = null;
 
   readonly Play = Play;
 
@@ -59,13 +61,17 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     });
 
     const gameSub = this.gameService.currentQuestion$.subscribe(
-      (question: ValidQuestion | null) => {
-        if (question) {
+      (payload: QuestionPayload | null) => {
+        this.stopTimer();
+
+        if (payload) {
           this.isGameOver = false;
-          this.currentQuestion = question;
+          this.currentQuestion = payload.question;
           this.selectedAnswerIndex = null;
           this.answerSubmitted = false;
           this.lastAnswerResult = null;
+
+          this.startTimer(payload.questionTimeLimit);
         }
       },
     );
@@ -74,8 +80,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
       this.lastAnswerResult = result;
     });
 
-    const gameOverSub = this.gameService.gameOver$.subscribe((data) => {
-      console.log('Game Over: ', data);
+    const gameOverSub = this.gameService.gameOver$.subscribe(() => {
       this.isGameOver = true;
       this.currentQuestion = null;
     });
@@ -87,6 +92,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.stopTimer();
     this.roomService.leaveRoom(this.roomId!);
     this.sub.unsubscribe();
     clearInterval(this.countdownInterval);
@@ -109,12 +115,10 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectAnswer(index: number) {
+  selectAnswer(index: number | null) {
     if (this.answerSubmitted) return;
 
     this.selectedAnswerIndex = index;
-    this.answerSubmitted = true;
-    this.gameService.submitAnswer(this.roomId!, index);
   }
 
   returnToLobby() {
@@ -123,5 +127,26 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
   leaveLobby() {
     this.router.navigate(['/']);
+  }
+
+  private startTimer(timeLimit: number) {
+    this.questionCountdown = timeLimit;
+
+    this.timerSub = timer(1000, 1000).subscribe(() => {
+      if (this.questionCountdown > 0) {
+        this.questionCountdown--;
+      }
+
+      if (this.questionCountdown === 0) {
+        this.stopTimer();
+        this.answerSubmitted = true;
+        this.gameService.submitAnswer(this.roomId!, this.selectedAnswerIndex);
+      }
+    });
+  }
+
+  private stopTimer() {
+    this.timerSub?.unsubscribe();
+    this.timerSub = null;
   }
 }

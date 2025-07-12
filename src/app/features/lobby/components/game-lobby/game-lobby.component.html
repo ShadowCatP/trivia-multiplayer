@@ -24,6 +24,15 @@
     </div>
   } @else {
     @if (currentQuestion) {
+      <div
+        class="mb-4 text-6xl font-bold"
+        [ngClass]="{
+          'animate-pulse text-red-500': countdown <= 5 && countdown > 0,
+        }"
+      >
+        {{ questionCountdown }}
+      </div>
+
       <h2 class="text-5xl font-bold tracking-wider">
         {{ currentQuestion.question }}
       </h2>
@@ -46,12 +55,17 @@
             <button
               class="rounded-xl border border-white/40 bg-black/20 px-12 py-6 transition-transform hover:scale-102 disabled:scale-100 disabled:cursor-not-allowed"
               [ngClass]="{
-                'border-purple-500 bg-purple-600/20 ring-2 ring-purple-500':
-                  $index === selectedAnswerIndex && !lastAnswerResult,
+                'border-purple-500 bg-purple-600/30 ring-2 ring-purple-500':
+                  !answerSubmitted && $index === selectedAnswerIndex,
                 'border-green-500 bg-green-500/30 ring-2 ring-green-500':
-                  $index === selectedAnswerIndex && lastAnswerResult?.correct,
+                  answerSubmitted &&
+                  $index === selectedAnswerIndex &&
+                  lastAnswerResult?.correct,
                 'border-red-500 bg-red-500/30 ring-2 ring-red-500':
-                  $index === selectedAnswerIndex && !lastAnswerResult?.correct,
+                  answerSubmitted &&
+                  $index === selectedAnswerIndex &&
+                  lastAnswerResult &&
+                  !lastAnswerResult.correct,
               }"
               [disabled]="answerSubmitted"
               (click)="selectAnswer($index)"

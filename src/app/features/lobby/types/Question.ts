@@ -18,3 +18,8 @@ export type TrueFalseQuestion = Question & {
 };
 
 export type ValidQuestion = MultipleChoiceQuestion | TrueFalseQuestion;
+
+export type QuestionPayload = {
+  question: ValidQuestion;
+  questionTimeLimit: number;
+};
