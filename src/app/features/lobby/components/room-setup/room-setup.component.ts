@@ -29,13 +29,13 @@ export class RoomSetupComponent implements OnInit {
   @Input() initialValues?: RoomSettings;
 
   maxPlayersOptions = [2, 4, 6, 8, 10, 12];
-  questionsTimeOptions = [15, 30, 45, 60, 90];
+  questionsTimeOptions = [5, 10, 15, 30, 45];
 
   roomForm = this.fb.group({
     roomName: ['', Validators.required],
     isPublic: [true],
     maxPlayers: [8],
-    questionTimeLimit: [30],
+    questionTimeLimit: [15],
     shuffleQuestions: [true],
     showAnswersAfterQuestion: [true],
   });
