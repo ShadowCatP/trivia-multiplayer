@@ -6,7 +6,11 @@ import { Subscription, timer } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { GameService } from '../../services/game.service';
 import { RoomService } from '../../services/room.service';
-import { QuestionPayload, ValidQuestion } from '../../types/Question';
+import {
+  AnswerResultPayload,
+  QuestionPayload,
+  ValidQuestion,
+} from '../../types/Question';
 import { RoomState } from '../../types/Room';
 import { GameOverComponent } from '../game-over/game-over.component';
 import { InviteCodeComponent } from '../invite-code/invite-code.component';
@@ -33,7 +37,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   currentQuestion: ValidQuestion | null = null;
   selectedAnswerIndex: number | null = null;
   answerSubmitted = false;
-  lastAnswerResult: { correct: boolean } | null = null;
+  lastAnswerResult: AnswerResultPayload | null = null;
   timeRemaining = 0;
 
   // pre-game state

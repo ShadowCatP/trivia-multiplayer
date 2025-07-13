@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ValidQuestion } from '../../types/Question';
+import { AnswerResultPayload, ValidQuestion } from '../../types/Question';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -13,7 +13,7 @@ export class QuestionDisplayComponent {
   @Input() timeRemaining = 0;
   @Input() selectedAnswerIndex: number | null = null;
   @Input() answerSubmitted = false;
-  @Input() lastAnswerResult: { correct: boolean } | null = null;
+  @Input() lastAnswerResult: AnswerResultPayload | null = null;
 
   @Output() answerSelected = new EventEmitter<number>();
 

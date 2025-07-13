@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TokenService } from '../../auth/services/token.service';
-import { QuestionPayload } from '../types/Question';
+import { AnswerResultPayload, QuestionPayload } from '../types/Question';
 import { SocketService } from './socket.service';
 
 @Injectable({
@@ -16,7 +16,7 @@ export class GameService {
   );
   currentQuestion$ = this.currentQuestionSubject.asObservable();
 
-  private answerResultSubject = new Subject<{ correct: boolean }>();
+  private answerResultSubject = new Subject<AnswerResultPayload>();
   answerResult$ = this.answerResultSubject.asObservable();
 
   private gameOverSubject = new Subject<any>();
@@ -27,7 +27,7 @@ export class GameService {
       this.currentQuestionSubject.next(data);
     });
 
-    this.socket.on('answer_result', (data: { correct: boolean }) => {
+    this.socket.on('answer_result', (data: AnswerResultPayload) => {
       this.answerResultSubject.next(data);
     });
 

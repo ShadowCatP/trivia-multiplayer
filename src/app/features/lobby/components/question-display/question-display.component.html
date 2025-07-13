@@ -22,13 +22,13 @@
               !answerSubmitted && $index === selectedAnswerIndex,
             'border-green-500 bg-green-500/30 ring-2 ring-green-500':
               answerSubmitted &&
-              $index === selectedAnswerIndex &&
-              lastAnswerResult?.correct,
+              lastAnswerResult &&
+              $index === lastAnswerResult.correctAnswerIndex,
             'border-red-500 bg-red-500/30 ring-2 ring-red-500':
               answerSubmitted &&
-              $index === selectedAnswerIndex &&
               lastAnswerResult &&
-              !lastAnswerResult.correct,
+              !lastAnswerResult.correct &&
+              $index === selectedAnswerIndex,
           }"
           [disabled]="answerSubmitted"
           (click)="onSelectAnswer($index)"

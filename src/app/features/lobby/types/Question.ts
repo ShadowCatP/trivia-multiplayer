@@ -23,3 +23,8 @@ export type QuestionPayload = {
   question: ValidQuestion;
   questionTimeLimit: number;
 };
+
+export type AnswerResultPayload = {
+  correct: boolean;
+  correctAnswerIndex: number;
+};
