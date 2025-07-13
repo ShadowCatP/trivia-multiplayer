@@ -1,7 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { catchError, tap, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  Observable,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 import { environment } from '../../../environments/environments';
 import { TokenService } from './token.service';
 
@@ -14,6 +21,9 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly jwtHelper = inject(JwtHelperService);
   private readonly tokenService = inject(TokenService);
+
+  private isRefreshing = false;
+  private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
   get accessToken(): string | null {
     return this.tokenService.accessToken();
@@ -67,26 +77,50 @@ export class AuthService {
       );
   }
 
-  updateToken() {
-    const refreshToken = this.tokenService.refreshToken();
-    if (!refreshToken) return throwError(() => new Error('No refresh token'));
+  updateToken(): Observable<string> {
+    if (this.isRefreshing) {
+      return new Observable((observer) => {
+        this.refreshTokenSubject.subscribe((token) => {
+          if (token) {
+            observer.next(token);
+            observer.complete();
+          }
+        });
+      });
+    } else {
+      this.isRefreshing = true;
+      this.refreshTokenSubject.next(null);
 
-    return this.http
-      .post<{ access_token: string }>(this.authUrl + '/refresh', null, {
-        headers: {
-          Authorization: `Bearer ${refreshToken}`,
-        },
-      })
-      .pipe(
-        tap(({ access_token }) => {
-          this.tokenService.setTokens(access_token, refreshToken);
-        }),
-        catchError((err) => {
-          console.error('Token refresh failed:', err);
-          this.logout();
-          return throwError(() => err);
-        }),
-      );
+      const refreshToken = this.tokenService.refreshToken();
+      if (!refreshToken) {
+        this.isRefreshing = false;
+        this.logout();
+      }
+
+      return this.http
+        .post<{ access_token: string }>(`${this.authUrl}/refresh`, null, {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+          },
+        })
+        .pipe(
+          tap(({ access_token }) => {
+            this.isRefreshing = false;
+            this.tokenService.setTokens(access_token, refreshToken!);
+            this.refreshTokenSubject.next(access_token);
+          }),
+          switchMap(({ access_token }) => {
+            return new Observable<string>((observer) =>
+              observer.next(access_token),
+            );
+          }),
+          catchError((err) => {
+            this.isRefreshing = false;
+            this.logout();
+            return throwError(() => err);
+          }),
+        );
+    }
   }
 
   logout() {

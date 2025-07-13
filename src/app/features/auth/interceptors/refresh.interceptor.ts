@@ -5,42 +5,29 @@ import { TokenService } from '../services/token.service';
 import { catchError, switchMap, throwError } from 'rxjs';
 
 export const refreshInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(AuthService);
-  const tokenService = inject(TokenService);
+  const authService = inject(AuthService);
 
   return next(req).pipe(
     catchError((err) => {
-      // If the request was to /refresh and failed, logout
-      if (req.url.includes('/refresh')) {
-        auth.logout();
+      if (
+        req.url.includes('/login') ||
+        req.url.includes('/refresh') ||
+        err.status !== 401
+      ) {
         return throwError(() => err);
       }
 
-      // If 401, try to refresh
-      if (err.status === 401) {
-        return auth.updateToken().pipe(
-          switchMap(() => {
-            const newToken = tokenService.accessToken();
-
-            if (!newToken) {
-              auth.logout();
-              return throwError(() => err);
-            }
-
-            const retryReq = req.clone({
-              setHeaders: { Authorization: `Bearer ${newToken}` },
-            });
-            return next(retryReq);
-          }),
-          catchError((refreshErr) => {
-            auth.logout();
-            return throwError(() => refreshErr);
-          }),
-        );
-      }
-
-      // For other errors, just throw
-      return throwError(() => err);
+      return authService.updateToken().pipe(
+        switchMap((newToken) => {
+          const retryReq = req.clone({
+            setHeaders: { Authorization: `Bearer ${newToken}` },
+          });
+          return next(retryReq);
+        }),
+        catchError((refreshErr) => {
+          return throwError(() => refreshErr);
+        }),
+      );
     }),
   );
 };
