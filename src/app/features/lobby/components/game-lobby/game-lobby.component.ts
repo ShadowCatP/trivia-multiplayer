@@ -83,6 +83,12 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.gameService.gameOver$.subscribe(() => this.handleGameOver()),
     );
+
+    this.sub.add(
+      this.gameService.countdownStarted$.subscribe(() => {
+        this.runCountdown();
+      }),
+    );
   }
 
   ngOnDestroy(): void {
@@ -93,7 +99,10 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
   handleStartGame() {
     if (!this.isHost) return;
+    this.gameService.triggerCountdown(this.roomId!);
+  }
 
+  private runCountdown() {
     this.startCountdown = 3;
     this.showStartCountdown = true;
 
@@ -103,7 +112,10 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
       if (this.startCountdown === 0) {
         clearInterval(interval);
         this.showStartCountdown = false;
-        this.gameService.startGame(this.roomId!);
+
+        if (this.isHost) {
+          this.gameService.startGame(this.roomId!);
+        }
       }
     }, 1000);
   }

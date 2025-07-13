@@ -22,6 +22,9 @@ export class GameService {
   private gameOverSubject = new Subject<any>();
   gameOver$ = this.gameOverSubject.asObservable();
 
+  private countdownStartedSubject = new Subject<void>();
+  countdownStarted$ = this.countdownStartedSubject.asObservable();
+
   constructor() {
     this.socket.on('new_question', (data: QuestionPayload) => {
       this.currentQuestionSubject.next(data);
@@ -34,6 +37,10 @@ export class GameService {
     this.socket.on('game_over', (data) => {
       this.gameOverSubject.next(data);
       this.currentQuestionSubject.next(null);
+    });
+
+    this.socket.on('countdown_started', () => {
+      this.countdownStartedSubject.next();
     });
 
     this.socket.on('error', (data) => {
@@ -57,5 +64,9 @@ export class GameService {
       answer_index: answerIndex,
       token,
     });
+  }
+
+  triggerCountdown(roomId: string) {
+    this.socket.emit('trigger_countdown', { room_id: roomId });
   }
 }
