@@ -2,10 +2,12 @@
   class="mx-auto flex min-h-[calc(100vh-64px)] max-w-screen-xl flex-col items-center gap-4 px-2 py-10 text-white"
 >
   @if (isGameOver) {
-    <app-game-over
-      (returnToLobby)="handleReturnToLobby()"
-      (leaveLobby)="handleLeaveLobby()"
-    />
+    <div class="flex flex-1 items-center justify-center">
+      <app-game-over
+        (returnToLobby)="handleReturnToLobby()"
+        (leaveLobby)="handleLeaveLobby()"
+      />
+    </div>
   } @else if (currentQuestion) {
     <div
       class="flex h-full w-full flex-1 flex-col items-center justify-center gap-8"

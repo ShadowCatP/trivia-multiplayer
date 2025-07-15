@@ -156,8 +156,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
     this.timerSub = timer(1000, 1000).subscribe(() => {
       if (this.timeRemaining > 0) {
-        // TODO Commented for testing only
-        // this.timeRemaining--;
+        this.timeRemaining--;
       }
 
       if (this.timeRemaining === 0) {
