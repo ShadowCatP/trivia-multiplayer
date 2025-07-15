@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LucideAngularModule, Play } from 'lucide-angular';
+import { LucideAngularModule, Play, Clock } from 'lucide-angular';
 import { Subscription, timer } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { GameService } from '../../services/game.service';
@@ -14,7 +14,6 @@ import {
 import { RoomState } from '../../types/Room';
 import { GameOverComponent } from '../game-over/game-over.component';
 import { InviteCodeComponent } from '../invite-code/invite-code.component';
-import { QuestionDisplayComponent } from '../question-display/question-display.component';
 import { UsersListComponent } from '../users-list/users-list.component';
 
 @Component({
@@ -24,8 +23,8 @@ import { UsersListComponent } from '../users-list/users-list.component';
     InviteCodeComponent,
     UsersListComponent,
     CommonModule,
-    QuestionDisplayComponent,
     GameOverComponent,
+    LucideAngularModule,
   ],
   templateUrl: './game-lobby.component.html',
   styleUrl: './game-lobby.component.css',
@@ -55,6 +54,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
   // Icons
   readonly Play = Play;
+  readonly Clock = Clock;
 
   constructor() {}
 
@@ -156,7 +156,8 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
     this.timerSub = timer(1000, 1000).subscribe(() => {
       if (this.timeRemaining > 0) {
-        this.timeRemaining--;
+        // TODO Commented for testing only
+        // this.timeRemaining--;
       }
 
       if (this.timeRemaining === 0) {
