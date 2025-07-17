@@ -4,7 +4,9 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import {
   BehaviorSubject,
   catchError,
+  map,
   Observable,
+  of,
   switchMap,
   tap,
   throwError,
@@ -42,6 +44,33 @@ export class AuthService {
         !this.jwtHelper.isTokenExpired(refreshToken))
     );
   });
+
+  checkAuthAndRefresh(): Observable<boolean> {
+    const accessToken = this.tokenService.accessToken();
+    const refreshToken = this.tokenService.refreshToken();
+
+    if (!this.isValidJwt(accessToken) || !this.isValidJwt(refreshToken)) {
+      this.logout();
+      return of(false);
+    }
+
+    if (!this.jwtHelper.isTokenExpired(accessToken)) {
+      return of(true);
+    }
+
+    if (this.jwtHelper.isTokenExpired(refreshToken)) {
+      this.logout();
+      return of(false);
+    }
+
+    return this.updateToken().pipe(
+      map(() => true),
+      catchError(() => {
+        this.logout();
+        return of(false);
+      }),
+    );
+  }
 
   login(credentials: { username: string; password: string }) {
     return this.http
@@ -95,6 +124,7 @@ export class AuthService {
       if (!refreshToken) {
         this.isRefreshing = false;
         this.logout();
+        return throwError(() => new Error('No refresh token'));
       }
 
       return this.http
@@ -139,6 +169,22 @@ export class AuthService {
       return decodedToken?.sub || null;
     } catch (err) {
       return null;
+    }
+  }
+
+  private isValidJwt(token: string | null): boolean {
+    if (!token) return false;
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+
+    try {
+      const header = JSON.parse(atob(parts[0]));
+      const payload = JSON.parse(atob(parts[1]));
+
+      if (!payload || typeof payload !== 'object') return false;
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 }
