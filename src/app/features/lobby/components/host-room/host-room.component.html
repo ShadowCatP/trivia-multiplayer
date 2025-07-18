@@ -59,15 +59,15 @@
   }
   @if (currentStep === "questions") {
     <app-questions-editor
-      [initialValues]="validQuestions"
-      (back)="goToStep('setup')"
+      [initialValues]="questions"
+      (back)="handleQuestionsPrev($event)"
       (next)="handleQuestionsNext($event)"
     />
   }
   @if (currentStep === "review") {
     <app-review
       [roomSettings]="roomSettings"
-      [validQuestions]="validQuestions"
+      [validQuestions]="questions"
       [isCreating]="isCreating"
       (back)="goToStep('questions')"
       (next)="createRoom()"

@@ -36,7 +36,7 @@ export class HostRoomComponent {
 
   currentStep: FormStep = 'setup';
   roomSettings!: RoomSettings;
-  validQuestions: ValidQuestion[] = [];
+  questions: ValidQuestion[] = [];
   isCreating = false;
   error: string | null = null;
 
@@ -64,31 +64,35 @@ export class HostRoomComponent {
     this.goToStep('questions');
   }
 
+  handleQuestionsPrev(questions: ValidQuestion[]) {
+    this.questions = questions;
+    console.log(questions);
+    this.goToStep('setup');
+  }
+
   handleQuestionsNext(questions: ValidQuestion[]) {
-    this.validQuestions = questions;
+    this.questions = questions;
     this.goToStep('review');
   }
 
   createRoom() {
     this.isCreating = true;
 
-    this.lobbyService
-      .createLobby(this.roomSettings, this.validQuestions)
-      .subscribe({
-        next: (res) => {
-          this.isCreating = false;
+    this.lobbyService.createLobby(this.roomSettings, this.questions).subscribe({
+      next: (res) => {
+        this.isCreating = false;
 
-          const roomId = res?.id;
-          if (roomId) {
-            this.router.navigate(['room', roomId]);
-          } else {
-            this.error = 'Server is down. Please try again later.';
-          }
-        },
-        error: (err) => {
-          this.error = 'Something went wrong. Please try again later.';
-          this.isCreating = false;
-        },
-      });
+        const roomId = res?.id;
+        if (roomId) {
+          this.router.navigate(['room', roomId]);
+        } else {
+          this.error = 'Server is down. Please try again later.';
+        }
+      },
+      error: (err) => {
+        this.error = 'Something went wrong. Please try again later.';
+        this.isCreating = false;
+      },
+    });
   }
 }

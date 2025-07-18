@@ -237,7 +237,7 @@
     <div class="mt-8 flex justify-between">
       <button
         type="button"
-        (click)="back.emit()"
+        (click)="back.emit(questionForm.value.questions)"
         class="rounded-xl border border-white/20 bg-white/10 px-6 py-3 transition-colors duration-300 hover:bg-white/20"
       >
         Back to Setup

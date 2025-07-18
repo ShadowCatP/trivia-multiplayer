@@ -29,7 +29,7 @@ export class QuestionsEditorComponent implements OnInit {
   readonly Check = Check;
   readonly Trash2 = Trash2;
 
-  @Output() back = new EventEmitter<void>();
+  @Output() back = new EventEmitter<ValidQuestion[]>();
   @Output() next = new EventEmitter<ValidQuestion[]>();
 
   @Input() initialValues: ValidQuestion[] = [];
