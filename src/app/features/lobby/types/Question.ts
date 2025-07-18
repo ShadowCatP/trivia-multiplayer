@@ -22,6 +22,7 @@ export type ValidQuestion = MultipleChoiceQuestion | TrueFalseQuestion;
 export type QuestionPayload = {
   question: ValidQuestion;
   questionTimeLimit: number;
+  serverTimestamp: number;
 };
 
 export type AnswerResultPayload = {

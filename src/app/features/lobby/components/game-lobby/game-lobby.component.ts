@@ -75,9 +75,10 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     );
 
     this.sub.add(
-      this.gameService.answerResult$.subscribe(
-        (result) => (this.lastAnswerResult = result),
-      ),
+      this.gameService.answerResult$.subscribe((result) => {
+        this.lastAnswerResult = result;
+        this.stopTimer();
+      }),
     );
 
     this.sub.add(
@@ -138,12 +139,16 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   private handleNewQuestion(payload: QuestionPayload | null) {
     this.stopTimer();
     if (payload) {
+      const clientTimestamp = Date.now();
+      const latency = clientTimestamp - payload.serverTimestamp;
+      const timeElapsed = Math.floor(latency / 1000);
+
       this.isGameOver = false;
       this.currentQuestion = payload.question;
       this.selectedAnswerIndex = null;
       this.answerSubmitted = false;
       this.lastAnswerResult = null;
-      this.startTimer(payload.questionTimeLimit);
+      this.startTimer(payload.questionTimeLimit, timeElapsed);
     }
   }
 
@@ -153,8 +158,14 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     this.stopTimer();
   }
 
-  private startTimer(timeLimit: number) {
-    this.timeRemaining = timeLimit;
+  private startTimer(timeLimit: number, timeElapsed: number = 0) {
+    this.timeRemaining = Math.max(0, timeLimit - timeElapsed);
+
+    if (this.timeRemaining === 0) {
+      this.answerSubmitted = true;
+      this.gameService.submitAnswer(this.roomId!, this.selectedAnswerIndex);
+      return;
+    }
 
     this.timerSub = timer(1000, 1000).subscribe(() => {
       if (this.timeRemaining > 0) {
