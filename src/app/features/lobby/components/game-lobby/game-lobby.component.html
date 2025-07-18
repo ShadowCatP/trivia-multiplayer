@@ -27,6 +27,16 @@
         </div>
       </div>
 
+      <!--TODO spinner shows briefly for the last submitting user-->
+      @if (answerSubmitted && !lastAnswerResult) {
+        <div class="flex items-center gap-3">
+          <div
+            class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+          ></div>
+          <p>Waiting for others...</p>
+        </div>
+      }
+
       <h2 class="text-center text-5xl font-bold tracking-wider">
         {{ currentQuestion.question }}
       </h2>
@@ -39,16 +49,14 @@
                 class="rounded-xl border border-white/40 bg-black/20 px-12 py-6 text-left transition-transform hover:scale-102 disabled:scale-100 disabled:cursor-not-allowed"
                 [ngClass]="{
                   'border-purple-500 bg-purple-600/30 ring-2 ring-purple-500':
-                    !answerSubmitted && $index === selectedAnswerIndex,
+                    !lastAnswerResult && $index === selectedAnswerIndex,
                   'border-green-500 bg-green-500/30 ring-2 ring-green-500':
-                    answerSubmitted &&
                     lastAnswerResult &&
                     $index === lastAnswerResult.correctAnswerIndex,
                   'border-red-500 bg-red-500/30 ring-2 ring-red-500':
-                    answerSubmitted &&
                     lastAnswerResult &&
-                    !lastAnswerResult.correct &&
-                    $index === selectedAnswerIndex,
+                    $index === selectedAnswerIndex &&
+                    selectedAnswerIndex !== lastAnswerResult.correctAnswerIndex,
                 }"
                 [disabled]="answerSubmitted"
                 (click)="handleAnswerSelected($index)"

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LucideAngularModule, Play, Clock } from 'lucide-angular';
+import { Clock, LucideAngularModule, Play } from 'lucide-angular';
 import { Subscription, timer } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { GameService } from '../../services/game.service';
@@ -123,6 +123,8 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   handleAnswerSelected(index: number | null) {
     if (this.answerSubmitted) return;
     this.selectedAnswerIndex = index;
+    this.gameService.submitAnswer(this.roomId!, this.selectedAnswerIndex);
+    this.answerSubmitted = true;
   }
 
   handleReturnToLobby() {

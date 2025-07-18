@@ -25,6 +25,5 @@ export type QuestionPayload = {
 };
 
 export type AnswerResultPayload = {
-  correct: boolean;
   correctAnswerIndex: number;
 };
