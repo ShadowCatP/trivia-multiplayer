@@ -8,6 +8,8 @@ import { GameService } from '../../services/game.service';
 import { RoomService } from '../../services/room.service';
 import {
   AnswerResultPayload,
+  GameOverPaylod,
+  PlayerScore,
   QuestionPayload,
   ValidQuestion,
 } from '../../types/Question';
@@ -37,7 +39,12 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   selectedAnswerIndex: number | null = null;
   answerSubmitted = false;
   lastAnswerResult: AnswerResultPayload | null = null;
+  showScoreboard = false;
+  playerScores: PlayerScore[] = [];
   timeRemaining = 0;
+  private questionStartTime = 0;
+  private questionTimeLimitMs = 0;
+  private timerIntervalId: any = null;
 
   // pre-game state
   showStartCountdown = false;
@@ -49,7 +56,6 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sub = new Subscription();
-  private timerSub: Subscription | null = null;
   private readonly roomId = this.route.snapshot.paramMap.get('id');
 
   // Icons
@@ -77,12 +83,16 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.gameService.answerResult$.subscribe((result) => {
         this.lastAnswerResult = result;
+        this.playerScores = result.scores;
+        this.showScoreboard = true;
         this.stopTimer();
       }),
     );
 
     this.sub.add(
-      this.gameService.gameOver$.subscribe(() => this.handleGameOver()),
+      this.gameService.gameOver$.subscribe((payload) =>
+        this.handleGameOver(payload),
+      ),
     );
 
     this.sub.add(
@@ -123,13 +133,21 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
   handleAnswerSelected(index: number | null) {
     if (this.answerSubmitted) return;
+    const elapsedMs = Date.now() - this.questionStartTime;
+    const timeLeftMs = Math.max(0, this.questionTimeLimitMs - elapsedMs);
     this.selectedAnswerIndex = index;
-    this.gameService.submitAnswer(this.roomId!, this.selectedAnswerIndex);
+    this.gameService.submitAnswer(
+      this.roomId!,
+      this.selectedAnswerIndex,
+      timeLeftMs,
+    );
     this.answerSubmitted = true;
   }
 
   handleReturnToLobby() {
     this.isGameOver = false;
+    this.showScoreboard = false;
+    this.playerScores = [];
   }
 
   handleLeaveLobby() {
@@ -141,47 +159,56 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     if (payload) {
       const clientTimestamp = Date.now();
       const latency = clientTimestamp - payload.serverTimestamp;
-      const timeElapsed = Math.floor(latency / 1000);
+
+      this.questionStartTime = clientTimestamp - latency;
+      this.questionTimeLimitMs = payload.questionTimeLimit * 1000;
 
       this.isGameOver = false;
+      this.showScoreboard = false;
       this.currentQuestion = payload.question;
       this.selectedAnswerIndex = null;
       this.answerSubmitted = false;
       this.lastAnswerResult = null;
-      this.startTimer(payload.questionTimeLimit, timeElapsed);
+      this.startTimer();
     }
   }
 
-  private handleGameOver() {
+  private handleGameOver(payload: GameOverPaylod) {
     this.isGameOver = true;
     this.currentQuestion = null;
+    this.playerScores = payload.scores;
     this.stopTimer();
   }
 
-  private startTimer(timeLimit: number, timeElapsed: number = 0) {
-    this.timeRemaining = Math.max(0, timeLimit - timeElapsed);
+  private startTimer() {
+    const updateTimer = () => {
+      const elapsedMs = Date.now() - this.questionStartTime;
+      const remainingMs = Math.max(0, this.questionTimeLimitMs - elapsedMs);
 
-    if (this.timeRemaining === 0) {
-      this.answerSubmitted = true;
-      this.gameService.submitAnswer(this.roomId!, this.selectedAnswerIndex);
-      return;
-    }
+      this.timeRemaining = remainingMs / 1000;
 
-    this.timerSub = timer(1000, 1000).subscribe(() => {
-      if (this.timeRemaining > 0) {
-        this.timeRemaining--;
-      }
-
-      if (this.timeRemaining === 0) {
+      if (remainingMs === 0) {
         this.stopTimer();
-        this.answerSubmitted = true;
-        this.gameService.submitAnswer(this.roomId!, this.selectedAnswerIndex);
+        if (!this.answerSubmitted) {
+          this.answerSubmitted = true;
+          this.gameService.submitAnswer(
+            this.roomId!,
+            this.selectedAnswerIndex,
+            0,
+          );
+        }
       }
-    });
+    };
+
+    clearInterval(this.timerIntervalId);
+    this.timerIntervalId = setInterval(updateTimer, 50);
+    updateTimer();
   }
 
   private stopTimer() {
-    this.timerSub?.unsubscribe();
-    this.timerSub = null;
+    if (this.timerIntervalId) {
+      clearInterval(this.timerIntervalId);
+      this.timerIntervalId = null;
+    }
   }
 }

@@ -27,4 +27,14 @@ export type QuestionPayload = {
 
 export type AnswerResultPayload = {
   correctAnswerIndex: number;
+  scores: PlayerScore[];
+};
+
+export type PlayerScore = {
+  username: string;
+  score: number;
+};
+
+export type GameOverPaylod = {
+  scores: PlayerScore[];
 };

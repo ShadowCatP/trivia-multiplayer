@@ -1,7 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TokenService } from '../../auth/services/token.service';
-import { AnswerResultPayload, QuestionPayload } from '../types/Question';
+import {
+  AnswerResultPayload,
+  GameOverPaylod,
+  QuestionPayload,
+} from '../types/Question';
 import { SocketService } from './socket.service';
 
 @Injectable({
@@ -19,7 +23,7 @@ export class GameService {
   private answerResultSubject = new Subject<AnswerResultPayload>();
   answerResult$ = this.answerResultSubject.asObservable();
 
-  private gameOverSubject = new Subject<any>();
+  private gameOverSubject = new Subject<GameOverPaylod>();
   gameOver$ = this.gameOverSubject.asObservable();
 
   private countdownStartedSubject = new Subject<void>();
@@ -34,7 +38,7 @@ export class GameService {
       this.answerResultSubject.next(data);
     });
 
-    this.socket.on('game_over', (data) => {
+    this.socket.on('game_over', (data: GameOverPaylod) => {
       this.gameOverSubject.next(data);
       this.currentQuestionSubject.next(null);
     });
@@ -57,11 +61,12 @@ export class GameService {
     });
   }
 
-  submitAnswer(roomId: string, answerIndex: number | null) {
+  submitAnswer(roomId: string, answerIndex: number | null, timeLeftMs: number) {
     const token = this.tokenService.accessToken();
     this.socket.emit('submit_answer', {
       room_id: roomId,
       answer_index: answerIndex,
+      time_left_ms: timeLeftMs,
       token,
     });
   }
