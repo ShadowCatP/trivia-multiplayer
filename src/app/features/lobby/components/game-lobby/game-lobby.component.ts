@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Clock, LucideAngularModule, Play } from 'lucide-angular';
 import { Subscription, timer } from 'rxjs';
@@ -106,6 +112,11 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     this.stopTimer();
     this.roomService.leaveRoom(this.roomId!);
     this.sub.unsubscribe();
+  }
+
+  @HostListener('window:beforeunload')
+  handleUnload() {
+    this.roomService.leaveRoom(this.roomId!);
   }
 
   handleStartGame() {
