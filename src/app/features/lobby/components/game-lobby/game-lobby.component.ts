@@ -138,6 +138,18 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
         this.stopTimer();
       }),
     );
+
+    this.sub.add(
+      this.gameService.socketError$.subscribe((error) => {
+        if (error.status === 404) {
+          // Room not found, redirect to 404 page
+          this.router.navigate(['/not-found']);
+        } else {
+          // Show some toast notification or log
+          console.error(error.msg);
+        }
+      }),
+    );
   }
 
   ngOnDestroy(): void {

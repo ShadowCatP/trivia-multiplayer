@@ -32,6 +32,9 @@ export class GameService {
   private roundOverSubject = new Subject<void>();
   roundOver$ = this.roundOverSubject.asObservable();
 
+  private socketErrorSubject = new Subject<{ msg: string; status: number }>();
+  socketError$ = this.socketErrorSubject.asObservable();
+
   constructor() {
     this.socket.on('new_question', (data: QuestionPayload) => {
       this.currentQuestionSubject.next(data);
@@ -54,9 +57,8 @@ export class GameService {
       this.roundOverSubject.next();
     });
 
-    this.socket.on('error', (data) => {
-      // TODO deal with the errors properly
-      console.error(data.msg);
+    this.socket.on('error', (data: { msg: string; status: number }) => {
+      this.socketErrorSubject.next(data);
     });
   }
 

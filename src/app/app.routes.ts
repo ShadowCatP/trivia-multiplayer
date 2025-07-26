@@ -5,6 +5,7 @@ import { authGuard } from './features/auth/guards/auth.guard';
 import { GameLobbyComponent } from './features/lobby/components/game-lobby/game-lobby.component';
 import { HostRoomComponent } from './features/lobby/components/host-room/host-room.component';
 import { MainLobbyComponent } from './features/lobby/components/main-lobby/main-lobby.component';
+import { NotFoundComponent } from './shared/components/not-found/not-found.component';
 
 export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
@@ -12,4 +13,5 @@ export const routes: Routes = [
   { path: '', component: MainLobbyComponent, canActivate: [authGuard] },
   { path: 'room/host', component: HostRoomComponent, canActivate: [authGuard] },
   { path: 'room/:id', component: GameLobbyComponent, canActivate: [authGuard] },
+  { path: '**', component: NotFoundComponent },
 ];
