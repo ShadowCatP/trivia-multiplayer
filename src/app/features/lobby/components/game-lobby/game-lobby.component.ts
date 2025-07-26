@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Clock, LucideAngularModule, Play } from 'lucide-angular';
-import { Subscription, timer } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { GameService } from '../../services/game.service';
 import { RoomService } from '../../services/room.service';
@@ -23,6 +23,7 @@ import { RoomState } from '../../types/Room';
 import { GameOverComponent } from '../game-over/game-over.component';
 import { InviteCodeComponent } from '../invite-code/invite-code.component';
 import { UsersListComponent } from '../users-list/users-list.component';
+import { User } from '../../types/User';
 
 @Component({
   selector: 'app-game-lobby',
@@ -49,6 +50,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   playerScores: PlayerScore[] = [];
   timeRemaining = 0;
   waitingForOthers = false;
+  players: User[] = [];
   private spinnerTimeout: any = null;
   private questionStartTime = 0;
   private questionTimeLimitMs = 0;
@@ -78,7 +80,25 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.roomService.roomState$.subscribe((state) => {
         this.roomState = state;
-        this.isHost = this.authService.getCurrentUser() === state.host;
+        const currentUser = this.authService.getCurrentUser();
+        this.isHost = currentUser === state.host;
+        if (state.users && currentUser) {
+          const otherUsers = state.users
+            .filter((user) => user !== currentUser)
+            .sort((a, b) => a.localeCompare(b));
+          this.players = [
+            { username: currentUser, isCurrentUser: true },
+            ...otherUsers.map((user) => ({
+              username: user,
+              isCurrentUser: false,
+            })),
+          ];
+        } else {
+          this.players = state.users.map((u) => ({
+            username: u,
+            isCurrentUser: false,
+          }));
+        }
       }),
     );
 
@@ -116,11 +136,6 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
     this.stopTimer();
     this.roomService.leaveRoom(this.roomId!);
     this.sub.unsubscribe();
-  }
-
-  @HostListener('window:beforeunload')
-  handleUnload() {
-    this.roomService.leaveRoom(this.roomId!);
   }
 
   handleStartGame() {

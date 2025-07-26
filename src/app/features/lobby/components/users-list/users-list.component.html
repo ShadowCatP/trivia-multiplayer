@@ -3,8 +3,17 @@
     <div
       class="flex items-center justify-between rounded border border-white/40 bg-black/20 px-4 py-8"
     >
-      <p class="text-xl font-bold">{{ user }}</p>
-      @if (user === host) {
+      <span
+        class="flex items-center truncate"
+        [ngClass]="{ 'font-bold': user.isCurrentUser }"
+      >
+        <p class="text-xl font-bold">{{ user.username }}</p>
+        @if (user.isCurrentUser) {
+          <span class="ml-2 text-xl text-purple-400">(You)</span>
+        }
+      </span>
+
+      @if (user.username === host) {
         <lucide-angular [img]="Crown" class="h-5 w-5 text-yellow-500" />
       }
     </div>
