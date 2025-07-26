@@ -50,8 +50,7 @@
         </div>
       </div>
 
-      <!--TODO spinner shows briefly for the last submitting user-->
-      @if (answerSubmitted && !lastAnswerResult) {
+      @if (waitingForOthers) {
         <div class="flex items-center gap-3">
           <div
             class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"

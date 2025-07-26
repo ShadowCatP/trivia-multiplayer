@@ -48,6 +48,8 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
   showScoreboard = false;
   playerScores: PlayerScore[] = [];
   timeRemaining = 0;
+  waitingForOthers = false;
+  private spinnerTimeout: any = null;
   private questionStartTime = 0;
   private questionTimeLimitMs = 0;
   private timerIntervalId: any = null;
@@ -88,6 +90,8 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
     this.sub.add(
       this.gameService.answerResult$.subscribe((result) => {
+        clearTimeout(this.spinnerTimeout);
+        this.waitingForOthers = false;
         this.lastAnswerResult = result;
         this.playerScores = result.scores;
         this.showScoreboard = true;
@@ -153,6 +157,7 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
       timeLeftMs,
     );
     this.answerSubmitted = true;
+    this.spinnerTimeout = setTimeout(() => (this.waitingForOthers = true), 200);
   }
 
   handleReturnToLobby() {
@@ -167,6 +172,8 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
 
   private handleNewQuestion(payload: QuestionPayload | null) {
     this.stopTimer();
+    clearTimeout(this.spinnerTimeout);
+    this.waitingForOthers = false;
     if (payload) {
       const clientTimestamp = Date.now();
       const latency = clientTimestamp - payload.serverTimestamp;
