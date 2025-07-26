@@ -130,6 +130,14 @@ export class GameLobbyComponent implements OnInit, OnDestroy {
         this.runCountdown();
       }),
     );
+
+    this.sub.add(
+      this.gameService.roundOver$.subscribe(() => {
+        clearTimeout(this.spinnerTimeout);
+        this.waitingForOthers = false;
+        this.stopTimer();
+      }),
+    );
   }
 
   ngOnDestroy(): void {

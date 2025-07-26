@@ -29,6 +29,9 @@ export class GameService {
   private countdownStartedSubject = new Subject<void>();
   countdownStarted$ = this.countdownStartedSubject.asObservable();
 
+  private roundOverSubject = new Subject<void>();
+  roundOver$ = this.roundOverSubject.asObservable();
+
   constructor() {
     this.socket.on('new_question', (data: QuestionPayload) => {
       this.currentQuestionSubject.next(data);
@@ -45,6 +48,10 @@ export class GameService {
 
     this.socket.on('countdown_started', () => {
       this.countdownStartedSubject.next();
+    });
+
+    this.socket.on('round_over', () => {
+      this.roundOverSubject.next();
     });
 
     this.socket.on('error', (data) => {
