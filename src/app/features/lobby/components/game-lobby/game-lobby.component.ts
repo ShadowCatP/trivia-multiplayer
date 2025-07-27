@@ -24,6 +24,7 @@ import { GameOverComponent } from '../game-over/game-over.component';
 import { InviteCodeComponent } from '../invite-code/invite-code.component';
 import { UsersListComponent } from '../users-list/users-list.component';
 import { User } from '../../types/User';
+import { HomeButtonComponent } from '../../../../shared/components/home-button/home-button.component';
 
 @Component({
   selector: 'app-game-lobby',
@@ -34,6 +35,7 @@ import { User } from '../../types/User';
     CommonModule,
     GameOverComponent,
     LucideAngularModule,
+    HomeButtonComponent,
   ],
   templateUrl: './game-lobby.component.html',
   styleUrl: './game-lobby.component.css',

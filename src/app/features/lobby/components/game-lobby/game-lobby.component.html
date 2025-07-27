@@ -1,6 +1,10 @@
 <div
   class="mx-auto flex min-h-[calc(100vh-64px)] max-w-screen-xl flex-col items-center gap-4 px-2 py-10 text-white"
 >
+  <div class="absolute top-24 left-6">
+    <app-home-button />
+  </div>
+
   @if (isGameOver) {
     <div class="flex flex-1 items-center justify-center">
       <app-game-over

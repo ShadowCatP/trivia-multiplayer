@@ -8,6 +8,7 @@ import { QuestionsEditorComponent } from '../questions-editor/questions-editor.c
 import { ReviewComponent } from '../review/review.component';
 import { RoomSetupComponent } from '../room-setup/room-setup.component';
 import { Router } from '@angular/router';
+import { HomeButtonComponent } from '../../../../shared/components/home-button/home-button.component';
 
 type FormStep = 'setup' | 'questions' | 'review';
 
@@ -24,6 +25,7 @@ type Step = {
     ReviewComponent,
     LucideAngularModule,
     CommonModule,
+    HomeButtonComponent,
   ],
   templateUrl: './host-room.component.html',
   styleUrl: './host-room.component.css',
