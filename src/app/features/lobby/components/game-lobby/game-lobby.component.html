@@ -1,125 +1,77 @@
-<div
-  class="mx-auto flex min-h-[calc(100vh-64px)] max-w-screen-xl flex-col items-center gap-4 px-2 py-10 text-white"
->
-  <div class="absolute top-24 left-6">
-    <app-home-button />
-  </div>
-
-  @if (isGameOver) {
-    <div class="flex flex-1 items-center justify-center">
-      <app-game-over
-        [scores]="playerScores"
-        (returnToLobby)="handleReturnToLobby()"
-        (leaveLobby)="handleLeaveLobby()"
-      />
+@if (state$ | async; as state) {
+  <div
+    class="mx-auto flex min-h-[calc(100vh-64px)] max-w-screen-xl flex-col items-center gap-4 px-2 py-10 text-white"
+  >
+    <div class="absolute top-24 left-6">
+      <app-home-button />
     </div>
-  } @else if (showScoreboard) {
-    <div class="flex w-full flex-1 flex-col items-center justify-center gap-8">
-      <h2 class="text-5xl font-bold tracking-wider">Leaderboard</h2>
-      <ul
-        class="w-full max-w-lg rounded-xl border border-white/40 bg-black/20 p-6"
-      >
-        @for (player of playerScores; track player.username; let i = $index) {
-          <li
-            class="flex items-center justify-between border-b border-white/20 py-3 text-2xl last:border-none"
-          >
-            <span class="flex items-center gap-4">
-              <span class="font-bold">{{ i + 1 }}.</span>
-              <span>{{ player.username }}</span>
-            </span>
-            <span class="font-semibold text-purple-400">{{
-              player.score
-            }}</span>
-          </li>
-        }
-      </ul>
-      <p class="mt-4 animate-pulse text-xl">Next question coming up...</p>
-    </div>
-  } @else if (currentQuestion) {
-    <div
-      class="flex h-full w-full flex-1 flex-col items-center justify-center gap-8"
-    >
-      <div
-        class="rounded-xl border border-white/40 bg-black/20 px-16 py-3 text-6xl font-bold"
-      >
-        <div
-          class="flex items-center gap-4"
-          [ngClass]="{
-            'animate-pulse text-red-500':
-              timeRemaining <= 5 && timeRemaining > 0,
-          }"
-        >
-          <lucide-angular [img]="Clock" class="h-10 w-10" />
-          {{ timeRemaining | number: "1.0-0" }}
-        </div>
-      </div>
 
-      @if (waitingForOthers) {
-        <div class="flex items-center gap-3">
-          <div
-            class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
-          ></div>
-          <p>Waiting for others...</p>
+    @switch (state.view) {
+      @case ("gameOver") {
+        <div class="flex flex-1 items-center">
+          <app-game-over
+            [scores]="state.playerScores"
+            (returnToLobby)="gameStateService.returnToLobby()"
+            (leaveLobby)="gameStateService.leaveLobby()"
+          />
         </div>
       }
-
-      <h2 class="text-center text-5xl font-bold tracking-wider">
-        {{ currentQuestion.question }}
-      </h2>
-
-      <div class="flex w-full flex-1 items-center">
-        <div class="flex w-full items-center justify-center">
-          <ul class="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-            @for (answer of currentQuestion.answers; track $index) {
-              <button
-                class="rounded-xl border border-white/40 bg-black/20 px-12 py-6 text-left transition-transform hover:scale-102 disabled:scale-100 disabled:cursor-not-allowed"
-                [ngClass]="{
-                  'border-purple-500 bg-purple-600/30 ring-2 ring-purple-500':
-                    !lastAnswerResult && $index === selectedAnswerIndex,
-                  'border-green-500 bg-green-500/30 ring-2 ring-green-500':
-                    lastAnswerResult &&
-                    $index === lastAnswerResult.correctAnswerIndex,
-                  'border-red-500 bg-red-500/30 ring-2 ring-red-500':
-                    lastAnswerResult &&
-                    $index === selectedAnswerIndex &&
-                    selectedAnswerIndex !== lastAnswerResult.correctAnswerIndex,
-                }"
-                [disabled]="answerSubmitted"
-                (click)="handleAnswerSelected($index)"
-              >
-                {{ answer }}
-              </button>
-            }
-          </ul>
+      @case ("scoreboard") {
+        <div class="flex flex-1 items-center">
+          <app-scoreboard [scores]="state.playerScores" />
         </div>
-      </div>
-    </div>
-  } @else {
-    <app-invite-code />
-    <div class="flex w-full flex-grow items-center justify-center">
-      <div class="w-full">
-        <app-users-list [users]="players" [host]="roomState.host" />
-      </div>
-    </div>
+      }
+      @case ("question") {
+        @if (state.currentQuestion) {
+          <div class="flex w-full flex-1 items-center justify-center">
+            <div class="w-full">
+              <app-question-display
+                [question]="state.currentQuestion"
+                [timeRemaining]="state.timeRemaining"
+                [waitingForOthers]="state.waitingForOthers"
+                [selectedAnswerIndex]="state.selectedAnswerIndex"
+                [lastAnswerResult]="state.lastAnswerResult"
+                [isAnswerSubmitted]="state.answerSubmitted"
+                (answerSelected)="gameStateService.submitAnswer($event)"
+              />
+            </div>
+          </div>
+        }
+      }
+      @default {
+        <app-invite-code />
 
-    @if (isHost) {
-      <button
-        (click)="handleStartGame()"
-        class="flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 px-8 py-3 text-xl font-semibold transition-all duration-300 hover:scale-105"
-      >
-        <lucide-angular [img]="Play" class="h-5 w-5" />
-        Start
-      </button>
-    }
-
-    @if (showStartCountdown) {
-      <div class="absolute inset-0 z-50 grid place-content-center bg-black/30">
-        <div
-          class="rounded-lg bg-purple-600 p-6 text-center text-2xl font-bold"
-        >
-          Game starting in {{ startCountdown }}...
+        <div class="flex w-full flex-grow items-center justify-center">
+          <div class="relative w-full">
+            <app-users-list
+              [users]="state.players"
+              [host]="state.roomState.host"
+            />
+          </div>
         </div>
-      </div>
+
+        @if (state.isHost) {
+          <button
+            (click)="gameStateService.triggerCountdown()"
+            class="flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 px-8 py-3 text-xl font-semibold transition-all duration-300 hover:scale-105"
+          >
+            <lucide-angular [img]="Play" class="h-5 w-5" />
+            Start
+          </button>
+        }
+
+        @if (state.view === "countdown") {
+          <div
+            class="absolute inset-0 z-50 grid place-content-center bg-black/30"
+          >
+            <div
+              class="rounded-lg bg-purple-600 p-6 text-center text-2xl font-bold"
+            >
+              Game starting in {{ state.startCountdown }}...
+            </div>
+          </div>
+        }
+      }
     }
-  }
-</div>
+  </div>
+}

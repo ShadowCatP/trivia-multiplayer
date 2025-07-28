@@ -1,0 +1,57 @@
+<div
+  class="flex h-full w-full flex-1 flex-col items-center justify-center gap-8"
+>
+  <div
+    class="absolute top-24 rounded-xl border border-white/40 bg-black/20 px-16 py-3 text-6xl font-bold"
+  >
+    <div
+      class="flex items-center gap-4"
+      [ngClass]="{
+        'animate-pulse text-red-500': timeRemaining <= 5 && timeRemaining > 0,
+      }"
+    >
+      <lucide-angular [img]="Clock" class="h-10 w-10" />
+      {{ timeRemaining | number: "1.0-0" }}
+    </div>
+  </div>
+
+  @if (waitingForOthers) {
+    <div class="flex items-center gap-3">
+      <div
+        class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+      ></div>
+      <p>Waiting for others...</p>
+    </div>
+  }
+
+  <h2 class="text-center text-5xl font-bold tracking-wider">
+    {{ question.question }}
+  </h2>
+
+  <div class="flex w-full flex-1 items-center">
+    <div class="flex w-full items-center justify-center">
+      <ul class="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+        @for (answer of question.answers; track $index) {
+          <button
+            class="rounded-xl border border-white/40 bg-black/20 px-12 py-6 text-left transition-transform hover:scale-102 disabled:scale-100 disabled:cursor-not-allowed"
+            [ngClass]="{
+              'border-purple-500 bg-purple-600/30 ring-2 ring-purple-500':
+                !lastAnswerResult && $index === selectedAnswerIndex,
+              'border-green-500 bg-green-500/30 ring-2 ring-green-500':
+                lastAnswerResult &&
+                $index === lastAnswerResult.correctAnswerIndex,
+              'border-red-500 bg-red-500/30 ring-2 ring-red-500':
+                lastAnswerResult &&
+                $index === selectedAnswerIndex &&
+                selectedAnswerIndex !== lastAnswerResult.correctAnswerIndex,
+            }"
+            [disabled]="isAnswerSubmitted"
+            (click)="onAnswerSelected($index)"
+          >
+            {{ answer }}
+          </button>
+        }
+      </ul>
+    </div>
+  </div>
+</div>

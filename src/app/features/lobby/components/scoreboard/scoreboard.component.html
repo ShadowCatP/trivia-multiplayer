@@ -1,0 +1,17 @@
+<div class="flex w-full flex-1 flex-col items-center justify-center gap-8">
+  <h2 class="text-5xl font-bold tracking-wider">Leaderboard</h2>
+  <ul class="w-full max-w-lg rounded-xl border border-white/40 bg-black/20 p-6">
+    @for (player of scores; track player.username; let i = $index) {
+      <li
+        class="flex items-center justify-between border-b border-white/20 py-3 text-2xl last:border-none"
+      >
+        <span class="flex items-center gap-4">
+          <span class="font-bold">{{ i + 1 }}.</span>
+          <span>{{ player.username }}</span>
+        </span>
+        <span class="font-semibold text-purple-400">{{ player.score }}</span>
+      </li>
+    }
+  </ul>
+  <p class="mt-4 animate-pulse text-xl">Next question coming up...</p>
+</div>
