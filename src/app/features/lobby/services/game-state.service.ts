@@ -92,11 +92,6 @@ export class GameStateService implements OnDestroy {
       ),
     );
     this.sub.add(
-      this.gameService.gameOver$.subscribe((payload) =>
-        this.onGameOver(payload.scores),
-      ),
-    );
-    this.sub.add(
       this.gameService.countdownStarted$.subscribe(() =>
         this.runStartCountdown(),
       ),
@@ -197,16 +192,11 @@ export class GameStateService implements OnDestroy {
     });
     this.timerService.stop();
 
-    setTimeout(() => this.updateState({ view: 'scoreboard' }), 3000);
-  }
-
-  private onGameOver(scores: PlayerScore[]) {
-    this.timerService.stop();
-    this.updateState({
-      view: 'gameOver',
-      playerScores: scores,
-      currentQuestion: null,
-    });
+    if (result.isLast) {
+      setTimeout(() => this.updateState({ view: 'gameOver' }), 3000);
+    } else {
+      setTimeout(() => this.updateState({ view: 'scoreboard' }), 3000);
+    }
   }
 
   private onRoundOver() {

@@ -28,6 +28,7 @@ export type QuestionPayload = {
 export type AnswerResultPayload = {
   correctAnswerIndex: number;
   scores: PlayerScore[];
+  isLast: boolean;
 };
 
 export type PlayerScore = {
