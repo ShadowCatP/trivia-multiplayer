@@ -37,6 +37,9 @@ export class GameLobbyComponent {
   public readonly state$: Observable<LobbyViewState> =
     this.gameStateService.state$;
 
+  public currentView: LobbyViewState['view'] = 'lobby';
+  public previousView: LobbyViewState['view'] = 'lobby';
+
   readonly Play = Play;
 
   ngOnInit(): void {
@@ -44,5 +47,12 @@ export class GameLobbyComponent {
     if (roomId) {
       this.gameStateService.initialize(roomId);
     }
+
+    this.state$.subscribe((state) => {
+      if (state.view !== this.currentView) {
+        this.previousView = this.currentView;
+        this.currentView = state.view;
+      }
+    });
   }
 }

@@ -2,13 +2,23 @@
   <div
     class="mx-auto flex min-h-[calc(100vh-64px)] max-w-screen-xl flex-col items-center gap-4 px-2 py-10 text-white"
   >
-    <div class="absolute top-24 left-6">
+    <div
+      class="sliding-panel"
+      [class.slide-in]="
+        currentView === 'scoreboard' && previousView !== 'scoreboard'
+      "
+      [class.slide-out]="
+        currentView !== 'scoreboard' && previousView === 'scoreboard'
+      "
+    ></div>
+
+    <div class="absolute top-24 left-6 z-10">
       <app-home-button />
     </div>
 
     @switch (state.view) {
       @case ("gameOver") {
-        <div class="flex flex-1 items-center">
+        <div class="view-enter flex flex-1 items-center">
           <app-game-over
             [scores]="state.playerScores"
             (returnToLobby)="gameStateService.returnToLobby()"
@@ -17,13 +27,17 @@
         </div>
       }
       @case ("scoreboard") {
-        <div class="flex flex-1 items-center">
+        <div
+          class="animated-container scoreboard-view relative z-10 flex flex-1 items-center"
+        >
           <app-scoreboard [scores]="state.playerScores" />
         </div>
       }
       @case ("question") {
         @if (state.currentQuestion) {
-          <div class="flex w-full flex-1 items-center justify-center">
+          <div
+            class="question-view animated-container relative z-0 flex w-full flex-1 items-center justify-center"
+          >
             <div class="w-full">
               <app-question-display
                 [question]="state.currentQuestion"
@@ -53,7 +67,7 @@
         @if (state.isHost) {
           <button
             (click)="gameStateService.triggerCountdown()"
-            class="flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 px-8 py-3 text-xl font-semibold transition-all duration-300 hover:scale-105"
+            class="relative z-10 flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 px-8 py-3 text-xl font-semibold transition-all duration-300 hover:scale-105"
           >
             <lucide-angular [img]="Play" class="h-5 w-5" />
             Start
